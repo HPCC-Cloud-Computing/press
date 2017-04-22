@@ -1,5 +1,6 @@
 import numpy as np
 
+
 class StatePredictor(object):
     def __init__(self, time_series, M, max_value, min_value=0.0):
         self.time_series = time_series
@@ -8,7 +9,7 @@ class StatePredictor(object):
         self.min_value = min_value
         # Độ rộng 1 bin
         self.width = (max_value - min_value) / M
-    
+
     # Xác định state của giá trị
     def state(self, value):
         return int(np.floor((value - self.min_value) / self.width))
@@ -26,7 +27,7 @@ class StatePredictor(object):
         p = np.zeros((self.M, self.M))
         s = [self.state(value) for value in self.time_series]
         for i in range(len(s) - 1):
-            p[s[i]][s[i+1]] += 1
+            p[s[i]][s[i + 1]] += 1
         for i in range(M):
             s = sum(p[i])
             if s != 0:
@@ -51,11 +52,12 @@ class StatePredictor(object):
             pt = pt * p
             # Xác suất trạng thái
             prob = pt[current_state]
-            #print(prob)
+            # print(prob)
             predict_state = prob.argmax()
-            #print(predict_state)
+            # print(predict_state)
             # Giá trị dự báo là giá trị lớn nhất của trạng thái
-            predict_value.append((predict_state + 1) * self.width + self.min_value)
+            predict_value.append(
+                (predict_state + 1) * self.width + self.min_value)
         print(predict_value)
-        
+
         return predict_value
