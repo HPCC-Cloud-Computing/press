@@ -1,6 +1,7 @@
 import numpy as np
 from scipy.stats.stats import pearsonr
 
+
 class SignaturePredictor(object):
     def __init__(self, time_series=[], sampling_rate=1.0):
         self.time_series = time_series
@@ -59,3 +60,4 @@ class SignaturePredictor(object):
         for i in range(z):
             signature[i] = sum(p[j][i] for j in range(q)) / q
         return signature
+      
