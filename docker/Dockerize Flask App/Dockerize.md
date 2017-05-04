@@ -36,20 +36,21 @@ Flask==0.12
 ```Dockerfile
 # Format: FROM    repository[:version]
 # File image gốc, ở đây là ubuntu 
-FROM       ubuntu:latest
+FROM       ubuntu:16.04
 
 # Thực hiện cài đặt python 
 RUN apt-get update -y
-RUN apt-get install -y python-pip python-dev build-essential
-
-# Copy các file vào thư mục app, cái đặt môi trường làm việc
-COPY . /app
-WORKDIR /app
+RUN apt-get install -y python3-pip python3-dev build-essential
 
 # Cài đặt thư viện cần thiết
-RUN pip install -r requirements.txt
+COPY requirements.txt /tmp
+RUN pip3 install -r /tmp/requirements.txt
 
-ENTRYPOINT ["python"]
+# Copy các file vào thư mục app, cái đặt môi trường làm việc
+COPY . /usr/src/app
+WORKDIR /usr/src/app
+
+ENTRYPOINT ["python3"]
 CMD ["app.py"]
 ```
 
