@@ -1,5 +1,5 @@
 # TỔNG QUAN VỀ CLOUD COMPUTING
----
+
 Được tham khảo từ tài liệu: Cloud computing principles and Paradigms
 * Tham khảo sơ đồ Mind-map theo link sau: [Mindmap] - Cloud
 
