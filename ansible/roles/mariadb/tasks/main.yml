@@ -1,0 +1,17 @@
+---
+- name: Install python for MySQL
+  yum: name={{ item }} state=latest
+  with_items:
+    - libselinux-python
+    - MySQL-python
+    
+- name: Add Mariadb Yum Repository
+  copy: src=MariaDB.repo dest=/etc/yum.repos.d/ mode=0644
+
+- name: Install MariaDB client packages
+  yum: name=MariaDB-client enablerepo=mariadb state=installed update_cache=yes
+
+- name: Install MariaDB server packages
+  yum: name=MariaDB-server enablerepo=mariadb state=installed update_cache=yes
+    
+- include: mysql_secure_installation.yml
