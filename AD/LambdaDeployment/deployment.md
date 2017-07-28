@@ -15,14 +15,14 @@ Kiến trúc lambda được mô phỏng cơ bản như sau:
 ![Lambda](Lambda.png)
 #### Các thành phần của kiến trúc Lambda
 * Các cấu hình của từng host này được trình bày khái quát trong bảng sau:
-[Lambda deployment sheet](https://docs.google.com/spreadsheets/d/1L-0FlfrMluBubkJqI2obiybbo0mkWy1662YjueJ1xkc/edit#gid=0)
+[Lambda deployment Demo](https://docs.google.com/spreadsheets/d/1iscbqkAMLdEXRGHbYO2HZ_cgEGEyA45_rBtMSeiCR-M/edit?usp=sharing)
 * Hiện tại đang trong quá trình develop nên các ip của dải hadoop sẽ lấy theo hostname của dải mgt.
 ### Cấu hình các phiên bản triển khai
 #### Các phiên bản yêu cầu cho hệ thống chính
 * Ambari: 2.5.1.0
 * HDP: 2.6.1
 #### Thu thâp thông tin trên các host
-Sử dụng cấu lệnh ```hostname -f``` để kiểm tra FQDN của một host. Sử lại sao cho đúng với cấu hình được ghi trong **Lambda Deployment Sheet**
+Sử dụng cấu lệnh ```hostname -f``` để kiểm tra FQDN của một host. Sử lại sao cho đúng với cấu hình được ghi trong **Lambda Deployment Demo**
 
 Chuẩn bị môi trường 
 ---
@@ -189,7 +189,7 @@ ambari-server status
 ```
 * Truy cập Ambari Server bằng baasts kì trình duyệt nào qua địa chỉ:
 [http://dashboard.mgt.lan:8080](http://dashboard.mgt.lan:8080)
-* Truy cập Ambari Server sử dụng **username/password** mặc định là **admin/admin**.
+* Truy cập Ambari Server sử dụng **username/password** mặc định là **admin/admin** (mặc định ) .
 ### Chạy Ambari Server Installation Wizard
 * Từ trang Ambari Welcome, chọn **Launch Install Wizard**:
 ![InstallWizard](InstallWizard.png)
