@@ -3,7 +3,7 @@ Mở rộng dung lượng nhớ
 Mục đích
 --- 
 * Trước hết, kiến trúc lambda mà chúng ta xây dựng để tiến hành lấy dữ liệu và phân tích log sẽ một lượng tài nguyên đáng kể để có thể tiến hành lưu trữ và xử lý các dữ liệu này. 
-* Vì các tài nguyên trong quá trình xử lý thực tế có thể không lường trước được lớn như thế nào ( cái này có thể không đúng vì đây là lần đầu làm với môi trường thật ), do vậy sẽ cần phải có giải pháp mở rộng dung lượng nhớ cho các node lưu trữ nhiều dữ liệu.
+* Vì các tài nguyên trong quá trình xử lý thực tế có thể không lường trước được lớn như thế nào (cái này có thể không đúng vì đây là lần đầu làm với môi trường thật), do vậy sẽ cần phải có giải pháp mở rộng dung lượng nhớ cho các node lưu trữ nhiều dữ liệu.
 * Vấn đề đặt ra ở đây không phải chỉ dừng tại việc mở rộng dung lượng bộ nhớ cho các node mà còn phải đảm bảo các node này vẫn hoạt động bình thường, không xảy ra thất thoát dữ liệu trong node và liên kết giữa các node với nhau.
 
 Tổng quan việc tiến hành
