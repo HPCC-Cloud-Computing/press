@@ -102,7 +102,7 @@ Tổng kết
 ---
 Các kĩ thuật Machine Learning được ứng dụng trong thực tế khắc phục nhược điểm thiếu tri thức trong kĩ thuật phát hiện cơ bản. Nhiều giải thuật đã được ứng dụng trong thực tế và đem lại kết quả tốt. Bài viết này chỉ nhằm để đánh giá tổng quan về vấn đề áp dụng Machine Learning trong bài toán Anomaly Detection và một và ưu nhược điểm của một số ít các thuật toán. Với các phương thức supervised, hiệu năng tốt nhất đạt được bằng các phương thức phi tuyến như SVM, MLP và các phương thức rule-based . SOM, OCSVM , K-means, FC-ANN là các thuật toán tốt trong unsupervised mặc dù chúng khác nhau về khả năng có thể phát hiện tấn công một cách hiệu quả.
 
-Tài liệu thảm khảo
+Tài liệu tham khảo
 ---
 * Machine Learning Techniques for Anomaly Detection:
 An Overview - Salima Omar, Asri Ngadi, Hamid H. Jebur - International Journal of Computer Applications (0975 – 8887)
