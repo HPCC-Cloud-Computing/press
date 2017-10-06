@@ -25,7 +25,7 @@ NUM_FEATURE_MAPS_2 = 12
 NUM_FEATURE = 92
 BATCH_SIZE = 50
 FLAGS = None
-EPOCH_NUMBER = 10
+EPOCH_NUMBER = 1
 TRAINING_SIZE = 60000
 
 
@@ -110,7 +110,7 @@ def deep_network(x):
 
         y_conv = tf.matmul(h_fc1_drop, w_fc2) + b_fc2
 
-    return y_conv, dropper, w_conv1, w_conv2, b_conv1, b_conv2,
+    return y_conv, dropper
 
 
 def main(_):
@@ -132,7 +132,6 @@ def main(_):
 
     with tf.name_scope('adam_optimizer'):
         train_step = tf.train.AdamOptimizer(1e-4).minimize(cross_entropy)
-
     with tf.name_scope('accuracy'):
         correct_prediction = tf.equal(tf.argmax(y_conv, 1), tf.argmax(y_, 1))
         correct_prediction = tf.cast(correct_prediction, tf.float32)
@@ -155,6 +154,7 @@ def main(_):
             })
             print("Epoch "+str(epoch+1)+" : Test accuracy: "+str(test_accuracy))
         print("Done!")
+
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
