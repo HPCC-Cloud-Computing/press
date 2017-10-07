@@ -161,8 +161,7 @@ def main(_):
 
     # Toi uu theo giai thuat co san tren tensorflow
     with tf.name_scope('momentum'):
-        train_step = tf.train.MomentumOptimizer(1e-2, 0.9).minimize(cross_entropy)
-
+        train_step = tf.train.AdamOptimizer(1e-4).minimize(cross_entropy)
     with tf.name_scope('accuracy'):
         correct_prediction = tf.equal(tf.argmax(y_conv, 1), tf.argmax(y_, 1))
         correct_prediction = tf.cast(correct_prediction, tf.float32)
