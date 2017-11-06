@@ -1,16 +1,16 @@
 from __future__ import print_function, division
 
 import numpy as np
-from utils import get_data
+from utils import get_data, compared_diagram
 from keras.layers import Convolution1D, Dense, MaxPooling1D, Flatten
 from keras.models import Sequential
-import matplotlib.pyplot as plt
+from sklearn.metrics import mean_squared_error
 
 # Tham so lien quan den neural network
 NUMBER_TIME_SERIES = 1
 NUMBER_OUTPUTS = 1
 NUMBER_FEATURE_MAPS = 4
-WINDOW_SIZE = 50
+WINDOW_SIZE = 30
 NUMBER_NEURAL_PER_LAYER = 5
 BATCH_SIZE = 10
 NUMBER_EPOCH = 200
@@ -20,6 +20,9 @@ INTERVAL_BY_SECOND = 600
 PEAK_PERCENT = 99
 START_DAY = 6
 END_DAY = 10
+
+# Tham so du lieu K-shift
+SHIFT_INDEX = 1
 
 
 # Thiet lap neural network
@@ -83,23 +86,20 @@ def evaluate_timeseries(time_series, window_size):
 def main():
     # Khai bao cac tham so trong CNN
     np.set_printoptions(threshold=25)
+
     # Khai bao du lieu
     time_series = get_data(START_DAY, END_DAY, INTERVAL_BY_SECOND)
     predicted_time_series = evaluate_timeseries(time_series, WINDOW_SIZE)
     actual_time_series = get_data(END_DAY, END_DAY, INTERVAL_BY_SECOND)
-    print(len(predicted_time_series))
-    print(len(actual_time_series))
+
+    # Ghi gia tri RMSE ra file (CNN)
+    rmse = np.sqrt(mean_squared_error(predicted_time_series, actual_time_series))
+    f = open("evaluate_result/mse"+str(WINDOW_SIZE)+".txt", "w")
+    f.write("Window size "+str(WINDOW_SIZE)+" : "+str(rmse)+"\n")
+    f.close()
 
     # Bieu do
-    x_axis = np.arange(0, len(predicted_time_series)) / 3600 * INTERVAL_BY_SECOND
-    plt.plot(x_axis, predicted_time_series)
-    plt.plot(x_axis, actual_time_series)
-    plt.xlabel('Hours')
-    plt.ylabel('Requests number by interval')
-    plt.xlim([0, 24])
-    plt.title('Worldcup 98 data: Day 11')
-    plt.legend(['Predicted time series ( window size = 50)', 'Actual time series'], loc='upper left')
-    plt.show()
+    compared_diagram(predicted_time_series, actual_time_series, WINDOW_SIZE)
 
 
 if __name__ == '__main__':
