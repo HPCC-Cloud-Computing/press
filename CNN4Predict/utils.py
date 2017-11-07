@@ -92,7 +92,10 @@ def get_data(start, end, interval):
     s = np.arange(start, end + 1, 1)
     temp_output = []
     for index in s:
-        targeted_file = 'dataset_folder/wc_day' + str(index) + '_1_' + str(interval) + '.out'
+        if index < 10:
+            targeted_file = 'dataset_folder/wc_day' + '0' + str(index) + '_1_' + str(interval) + '.out'
+        else:
+            targeted_file = 'dataset_folder/wc_day' + str(index) + '_1_' + str(interval) + '.out'
         temp_output += get_single_data(targeted_file)
     return temp_output
 
@@ -128,4 +131,7 @@ def compared_shift_diagram(predicted_series, actual_series, shift_index):
     plt.xlim([0, 24])
     plt.title('Worldcup 98 data: Day 10')
     plt.legend(['Predicted time series ( shift_index = '+str(shift_index)+')', 'Actual time series'], loc='upper left')
-    plt.savefig('figure/shift-'+str(shift_index)+'.png')
+    if shift_index < 10:
+        plt.savefig('figure/shift-' + '0' + str(shift_index) + '.png')
+    else:
+        plt.savefig('figure/shift-' + str(shift_index) + '.png')
