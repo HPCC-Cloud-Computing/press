@@ -1,5 +1,4 @@
 import numpy as np
-from paa import paa as paa_function
 
 # Test
 class GAF(object):
@@ -40,7 +39,6 @@ class GAF(object):
                            (max_time_series - min_time_series)
             normalize_series.append(temp_element)
         return normalize_series
-
 
     # Gramian angular field
     def gaf(self):
