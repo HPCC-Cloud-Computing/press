@@ -1,14 +1,17 @@
 import math
 
 class Scale(object):
-    def __init__(self, nbox, max_workload, cost):
+    def __init__(self, nbox, start_box, box_capacity, warm_up_time, cost):
         """
         nbox: number of boxes
-        workload: workload of a box
+        start_box
+        box_capacity: capacity of a box
         cost: cost of a box
         """
         self.nbox = nbox
-        self.max_workload = max_workload
+        self.start_box = start_box
+        self.warm_up_time = warm_up_time
+        self.box_capacity = box_capacity
         self.cost = cost
 
     def scale(self, data, interval=1):
@@ -22,21 +25,21 @@ class Scale(object):
             - cost for run
             - overload time
             - number of request lost
-
         """
         box = []
         overload_time = 0
         lost_request = 0
         cost = 0
-        for d in data:
-            b = math.ceil(d / self.max_workload)
-            if b > self.nbox:
-                box.append(self.nbox)
-                overload_time += interval
-                lost_request += d - self.nbox * self.max_workload
-                cost += self.nbox * self.cost
+        for i in range(len(data)):
+            need_box = math.ceil(data[i] / self.box_capacity)
+            if i < self.warm_up_time / interval:
+                b = self.start_box
             else:
-                box.append(b)
-                cost += b * self.cost
+                b = self.nbox if need_box > self.nbox else need_box
+            box.append(b)
+            cost += b * self.cost
+            if b < need_box:
+                overload_time += interval
+                lost_request += data[i] - b * self.box_capacity
 
         return (box, cost, overload_time, lost_request)
