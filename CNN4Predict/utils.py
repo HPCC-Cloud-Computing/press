@@ -110,7 +110,7 @@ def rmse(a, b):
 
 
 # Diagram between predicted time series and actual time series
-def compared_diagram(predicted_series, actual_series, window_size):
+def compared_diagram(predicted_series, actual_series, window_size, is_matrix = True):
     x_axis = np.arange(0, len(predicted_series)) / 3600 * INTERVAL_BY_SECOND
     plt.plot(x_axis, predicted_series)
     plt.plot(x_axis, actual_series)
@@ -119,7 +119,10 @@ def compared_diagram(predicted_series, actual_series, window_size):
     plt.xlim([0, 24])
     plt.title('Worldcup 98 data: Day 10')
     plt.legend(['Predicted time series ( window size = '+str(window_size)+')', 'Actual time series'], loc='upper left')
-    plt.savefig('figure/ws'+str(window_size)+'.png')
+    if is_matrix:
+        plt.savefig('figure/matrix/ws' + str(window_size) + '.png')
+    else:
+        plt.savefig('figure/ws'+str(window_size)+'.png')
 
 
 def compared_shift_diagram(predicted_series, actual_series, shift_index):
