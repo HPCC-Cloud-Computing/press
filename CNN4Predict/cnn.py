@@ -64,6 +64,7 @@ def evaluate_timeseries(time_series, window_size):
         time_series = time_series.T
 
     nb_samples, nb_series = time_series.shape
+    print(nb_samples, nb_series)
     model = neural_network(window_size=window_size,
                            filter_length=filter_length, nb_input_series=nb_series,
                            nb_outputs=nb_series, nb_filter=nb_filter)
