@@ -88,7 +88,11 @@ def get_single_data(targeted_file):
 
 
 # Nhan du lieu tren cac tap cho truoc
-def get_data(start, end, interval):
+def get_data(start: int, end: int, interval: int):
+    """
+
+    :rtype:
+    """
     s = np.arange(start, end + 1, 1)
     temp_output = []
     for index in s:
