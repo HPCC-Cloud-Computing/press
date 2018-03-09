@@ -8,7 +8,7 @@ from utils import get_single_data, get_data
 DEFAULT_INPUT_FILE_DIRECTORY = "input.txt"
 DEFAULT_OUTPUT_FILE_DIRECTORY = "output.csv"
 DEFAULT_MAX_BOX_REQUEST = 30
-DEFAULT_VECTOR_SIZE = 10
+DEFAULT_VECTOR_SIZE = 2
 DEFAULT_MODEL = 1
 DEFAULT_SCALE_IN_MAX = 10
 DEFAULT_SCALE_OUT_MAX = 10
@@ -72,6 +72,7 @@ def request_to_sets(input_request_list, box_max_request=DEFAULT_MAX_BOX_REQUEST,
                 data_matrix[i][-1] = int(-scale_in_max)
             else:
                 data_matrix[i][-1] = int(scale_out_max)
+        print(np.shape(data_matrix))
         return data_matrix
     else:
         print("Invalid vector_size. It can be greater than size of sequence")

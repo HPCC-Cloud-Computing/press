@@ -9,15 +9,16 @@ import numpy as np
 import mfDerivs
 import copy
 
+
 class ANFIS:
     """Class to implement an Adaptive Network Fuzzy Inference System: ANFIS"
 
-    Attributes:
-        X
-        Y
-        XLen
-        memClass
-        memFuncs
+    Các thuộc tính:
+        X - input
+        Y - output
+        XLen - Do dai input aka window size
+        memClass - Chua kieu ham fuzzy
+        memFuncs -
         memFuncsByVariable
         rules
         consequents
@@ -263,12 +264,9 @@ def backprop(ANFISObj, columnX, columns, theWSum, theW, theLayerFive):
 def predict(ANFISObj, varsToTest):
 
     [layerFour, wSum, w] = forwardHalfPass(ANFISObj, varsToTest)
-
     #layer five
     layerFive = np.dot(layerFour,ANFISObj.consequents)
-
     return layerFive
 
-
-if __name__ == "__main__":
+                                                                  if __name__ == "__main__":
     print ("I am main!")

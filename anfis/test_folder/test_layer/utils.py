@@ -88,7 +88,7 @@ def get_single_data(targeted_file):
 
 
 # Nhan du lieu tren cac tap cho truoc
-def get_data(start, end, interval):
+def get_data(start, end, interval=600):
     s = np.arange(start, end + 1, 1)
     temp_output = []
     for index in s:

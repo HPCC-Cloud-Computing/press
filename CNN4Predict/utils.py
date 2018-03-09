@@ -97,9 +97,9 @@ def get_data(start: int, end: int, interval: int):
     temp_output = []
     for index in s:
         if index < 10:
-            targeted_file = 'dataset_folder/wc_day' + '0' + str(index) + '_1_' + str(interval) + '.out'
+            targeted_file = 'dataset/wc_day' + '0' + str(index) + '_1_' + str(interval) + '.out'
         else:
-            targeted_file = 'dataset_folder/wc_day' + str(index) + '_1_' + str(interval) + '.out'
+            targeted_file = 'dataset/wc_day' + str(index) + '_1_' + str(interval) + '.out'
         temp_output += get_single_data(targeted_file)
     return temp_output
 
