@@ -2,9 +2,12 @@ import csv
 import numpy as np
 from skfuzzy import gaussmf
 from copy import deepcopy
+import random
+import matplotlib.pyplot as plt
 DEFAULT_MEAN = 10000
 DEFAULT_SIGMA = 10000
 DEFAULT_NUMBERMF_PER_NODE = 5
+WINDOW_SIZE = 20
 # bo du lieu de test
 X = []
 Y = []
@@ -14,7 +17,7 @@ def loss_function(x, y):
     temp = 0
     for i in np.arange(x.shape[0]):
         temp += 0.5*((x[i]-y[i])**2)
-    return temp
+    return np.sqrt(temp/x.shape[0])
 
 
 with open('w20.csv', newline='') as csvfile:
@@ -44,8 +47,8 @@ class FirstLayer:
         self.premise_parameter = np.ones((self.data.shape[1], self.numbmf_per_node, 2), dtype=float)
         for i in np.arange(self.data.shape[1]):
             for j in np.arange(self.numbmf_per_node):
-                self.premise_parameter[i][j][0] = DEFAULT_MEAN
-                self.premise_parameter[i][j][1] = DEFAULT_SIGMA
+                self.premise_parameter[i][j][0] = random.uniform(5000, 15000)
+                self.premise_parameter[i][j][1] = random.uniform(4000, 10000)
 
     def output(self):
         temp_output = np.zeros((self.train_size, self.window_size, self.numbmf_per_node), dtype=float)
@@ -75,7 +78,7 @@ def third_layer(output_2nd_layer):
     layer_size = output_2nd_layer.shape[1]
     temp_output = np.zeros((train_size, layer_size), dtype=float)
     for i in np.arange(train_size):
-        total = 0
+        total = 0.0
         for j in np.arange(layer_size):
             total += output_2nd_layer[i][j]
         for j in np.arange(layer_size):
@@ -86,7 +89,7 @@ def third_layer(output_2nd_layer):
 
 class FourthLayer:
     def __init__(self, numbermf_per_node):
-        self.consequent_parameter = np.ones((numbermf_per_node, numbermf_per_node + 1), dtype=float) / 100
+        self.consequent_parameter = np.ones((numbermf_per_node, WINDOW_SIZE + 1), dtype=float) / 100
         self.node_number = numbermf_per_node
 
     def output(self, input_data, output_3rd_layer):
@@ -95,8 +98,8 @@ class FourthLayer:
         temp_output = np.zeros((train_size, self.node_number), dtype=float)
         for i in np.arange(train_size):
             for j in np.arange(self.node_number):
-                for k in np.arange(self.node_number):
-                    temp_output[i][j] += p[j][k]*input_data[i][j]*output_3rd_layer[i][j]
+                for k in np.arange(WINDOW_SIZE):
+                    temp_output[i][j] += p[j][k]*input_data[i][k]*output_3rd_layer[i][j]
             temp_output[i][j] += p[j][self.node_number]
         return temp_output
 
@@ -127,16 +130,14 @@ class AnfisModel:
         output_3rd_layer = third_layer(output_2nd_layer)
         output_4th_layer = self.fourth_layer.output(X, output_3rd_layer)
         output_5th_layer = fifth_layer(output_4th_layer)
-        print(output_1st_layer.shape)
-        print(output_2nd_layer.shape)
-        print(output_3rd_layer.shape)
-        print(output_4th_layer.shape)
-        print(output_5th_layer.shape)
 
         return output_5th_layer
 
     def second_output(self):
         return second_layer(self.first_layer.output())
+
+    def first_output(self):
+        return self.first_layer.output()
 
     def half_predict(self):
         output_1st_layer = self.first_layer.output()
@@ -145,61 +146,63 @@ class AnfisModel:
         output_4th_layer = self.fourth_layer.output(X, output_3rd_layer)
         return output_4th_layer
 
-    def train_hybrid_jang(self):
-        pass
-
-    def backprogagation(self, eta = 0.99):
-        for i in np.arange(10000):
+    def backprogagation(self, eta = 0.85):
+        for i in np.arange(10):
+            combined = list(zip(self.X, self.Y))
+            random.shuffle(combined)
             # feedfoward
             z = self.predict()
             # print loss after 1000 iterations
             loss = loss_function(Y, z)
-            print("iter %d, loss: %f" % (i, loss))
+            print("iter %d, rmse: %f" % (i, loss))
             f = self.half_predict()
             muy = self.second_output()
-            print(muy.shape)
+            a = self.first_output()
             total_muy = np.zeros(muy.shape[0], dtype=float)
             for i in np.arange(muy.shape[0]):
                 for j in np.arange(muy.shape[1]):
                     total_muy[i] += muy[i][j]
-            # backprogagation
-            delta_mean = np.zeros((self.train_size, self.numb_per_node), dtype=float)
-            delta_sigma = np.zeros((self.train_size, self.numb_per_node), dtype=float)
-            print(muy.shape, total_muy.shape)
-            print(delta_mean.shape)
-            for i in np.arange(self.train_size):
-                for j in np.arange(self.numb_per_node):
-                    delta_mean[i][j] = (self.Y[i] - z[i])*(f[j]-self.Y[i])\
-                                       *(self.X[i]-self.premise_parameter[i][j][0])\
-                                       *muy[i][j]/(self.premise_parameter[i][j][1]
-                                                   *(self.X[i]**2)*total_muy[i])
-            print(delta_mean)
-            #
 
+            # backprogagation
+            delta_mean = np.zeros((WINDOW_SIZE, self.numb_per_node), dtype=float)
+            delta_sigma = np.zeros((WINDOW_SIZE, self.numb_per_node), dtype=float)
+            for k in np.arange(self.train_size):
+                for i in np.arange(WINDOW_SIZE):
+                    for j in np.arange(self.numb_per_node):
+                        delta_mean[i][j] = (z[k]-Y[k])*(f[k][j]-Y[k])*(X[k][i]-a[k][i][j]*X[k][i])*muy[k][j]\
+                                            / (self.first_layer.premise_parameter[i][j][1]*X[k][i]*X[k][i]*total_muy[k])
+                        delta_sigma[i][j] = (z[k]-Y[k])*(f[k][j]-Y[k])*((X[k][i]-a[k][i][j]*X[k][i])**2)*muy[k][j]\
+                                            / (self.first_layer.premise_parameter[i][j][1]*(X[k][i]**3)*total_muy[k])
+                for i in np.arange(WINDOW_SIZE):
+                    for j in np.arange(self.numb_per_node):
+                        self.first_layer.premise_parameter[i][j][0] -= eta*delta_mean[i][j]
+                        self.first_layer.premise_parameter[i][j][1] -= eta*delta_sigma[i][j]
+        return self.first_layer.premise_parameter
 
     def rlse(self):
         pass
 
+    def train_hybrid_jang(self):
+        self.backprogagation(eta=0.85)
+
     def evaluate(self):
         pass
-demo = AnfisModel(X, Y, 5)
-demo.backprogagation()
-print(demo.premise_parameter.shape)
-print(demo.consequent_parameter.shape)
-# firstLayer = FirstLayer(X, 5)
-# print(firstLayer.output().shape)
-#
-# output_second_layer = second_layer(firstLayer.output())
-# print(output_second_layer.shape)
-#
-# output_third_layer = third_layer(output_second_layer)
-# print(output_third_layer.shape)
-#
-# fourth_layer = FourthLayer(output_third_layer.shape[1])
-# output_fouth_layer = fourth_layer.output(input_data=X, output_3rd_layer=output_third_layer)
-# print(output_fouth_layer.shape)
-#
-# output_fifth_layer = fifth_layer(output_4th_layer=output_fouth_layer)
-# print(output_fifth_layer.shape)
 
+demo = AnfisModel(X, Y, 4)
+demo.train_hybrid_jang()
+
+z = demo.predict()
+for i in np.arange(z.shape[0]):
+    print("Predict: " + str(z[i]) + " . Actual: " + str(Y[i]))
+
+x_axis = np.arange(700)
+plt.plot(x_axis, z)
+plt.plot(x_axis, Y)
+plt.xlabel('')
+plt.ylabel('Requests number by interval')
+plt.xlim([0, 700])
+plt.title('Worldcup 98 data')
+plt.legend(['Predicted time series ', 'Actual time series'], loc='upper left')
+plt.savefig('compare.png')
+plt.show()
 
