@@ -9,7 +9,7 @@ func_dict = {'gaussmf': gaussmf, 'gbellmf': gbellmf, 'sigmf': sigmf}
 # Khung chua tham so cho mo hinh ANFIS
 # Hien tai moi chi ho tro 3 loai ham la gauss, gbell va sigmoi
 def frame_parameter(mf: str, rule_number: int, window_size: int): # premise parameters
-    x = [[['gaussmf', {'mean': random.uniform(15000, 20000), 'sigma': random.uniform(10000, 12500)}]  for i in np.arange(window_size)] for j in np.arange(rule_number)]
+    x = [[['gaussmf', {'mean': random.uniform(20000,25000), 'sigma': random.uniform(10000, 15000)}]  for i in np.arange(window_size)] for j in np.arange(rule_number)]
     return np.asarray(x)
             
 def consequence_parameter(rule_number: int, window_size: int):    
@@ -54,6 +54,10 @@ def fifth_layer(ofl: np.ndarray):
     return sum(ofl) 
 
 
+# Dao ham ham loi
+def er_function(x, y):
+    pass
+
 # Lop chua mo hinh ANFIS
 class ANFIS:
 
@@ -86,73 +90,110 @@ class ANFIS:
     def half_last(self, hf, x):
         layer4 = fouth_layer(hf, x, self.c_para)
         return fifth_layer(layer4)
-        
+    
+
+    def f_single(self, x):
+        hf = self.half_first(x)
+        wf = fouth_layer(hf, x, self.c_para)
+        return wf
+
+    def f_(self, x: np.ndarray):
+        return np.asarray([self.f_single(x[i]) for i in np.arange(self.training_size)])
+    
+    def w_(self, x: np.ndarray):
+        return np.asarray([self.half_first(x[i]) for i in np.arange(self.training_size)])
+
     # Phuong thuc du doan theo dau vao voi tham so trong mo hinh
     def output_single(self, x: np.ndarray):
-        #layer1 = first_layer(x, self.p_para)
-        #print(layer1)
-        #layer2 = second_layer(layer1)
-        #print(layer2)
-        #layer3 = third_layer(layer2)
-        #layer4 = fouth_layer(layer3, x, self.c_para)
-        #layer5 = fifth_layer(layer4)
         hf = self.half_first(x)
         hl = self.half_last(hf, x)
         return hl
-    
+   
     # Su dung de tinh ra mot chuoi cac gia tri du doan tu 1 mang cho truoc
     # Su dung de tinh loss function va in ra man hinh
     def output(self, inp_value):
         return np.asarray([self.output_single(inp_value[i]) for i in np.arange(self.training_size)])
-    
+   
+    # Dung cho tap test
     def predict(self, x:np.ndarray):
         return np.asarray([self.output_single(x[i]) for i in np.arange(x.shape[0])])
 
     # loss_function su dung de lam ham muc tieu trong GD
-    def loss_function(self):
+    def lossFunction(self):
         predict_value = self.output(self.X)
         actual_value = self.Y
         return ((predict_value - actual_value)**2).mean(axis=0)
     
-    def fix_p_para(self):
-        self.p_para[0][0][1]['mean'] += 10000
-
     def lse(self):
+        #print(self.lossFunction())
+        # Khai bao
         y_ = np.array(self.Y)[np.newaxis].T
         a = np.ones((self.training_size, (self.window_size+1) * self.rule_number), dtype=float)
         w = np.asarray([self.half_first(self.X[i]) for i in np.arange(self.training_size)])
+        # Bat dau tien hanh linear regression
         for i in np.arange(self.training_size):
             for j in np.arange(self.rule_number):
                 for k in np.arange(self.window_size):
                     a[i][j*(self.window_size+1)+k] = w[i][j]*self.X[i][k]
                 a[i][j*(self.window_size+1)+self.window_size] = w[i][j]
-        #temp_c_para = np.array(self.c_para.ravel())[np.newaxis].T
         c = np.dot(np.linalg.pinv(a), y_)
         self.c_para = np.reshape(c, self.c_para.shape)
+        #print(self.lossFunction())
         return 
     
-    # Su dung GD
-    def gd(self, epochs=1, eta=0.9, k=0.01, max_loop=1000):
+    # Dao ham ham loi ( lay ham Gauss), tien hanh dao ham cho tat ca cac truong hop
+    def derivError(self, mf='gauss', variable='mean'):
+        temp = np.zeros(self.p_para.shape)
+        d = self.predict(self.X)
+        y = self.Y
+        x = self.X
+        f = self.f_(self.X)
+        w = self.w_(self.X)
+        for k in np.arange(self.training_size):
+            for i in np.arange(self.window_size):
+                for j in np.arange(self.rule_number):
+                    #sigma
+                    temp[j][i][0] += (y[k] - d[k]) * (d[k] - f[k][j]) * w[k][j] * ((x[k][i] - self.p_para[j][i][1]['sigma'])) / (self.p_para[j][i][1]['mean']**2)
+                    # mean
+                    temp[j][i][1] += (y[k] - d[k]) * (d[k] - f[k][j]) * w[k][j] * ((x[k][i] - self.p_para[j][i][1]['sigma'])**2) / (self.p_para[j][i][1]['mean']**3)
+        #print('done')
+        return temp
+    
+    def deE(self):
         pass
+
+    # Su dung GD
+    def gd(self, epochs=1, eta=0.01, k=0.95, max_loop=10):
+        loop = 1
+        ll = 1
+        #print('loop: ', np.sqrt(self.lossFunction()))
+        derivE = self.derivError('gauss','mean')
+        #  Xu ly voi cac tham so mean
+        for i in np.arange(self.rule_number):
+            for j in np.arange(self.window_size):
+                self.p_para[i][j][1]['mean'] -= eta*derivE[i][j][0]
+                self.p_para[i][j][1]['sigma'] -= eta*derivE[i][j][1]
+        loop += 1
 
     # Su dung giai thuat hon hop
-    def HybridTraining(self):
-        pass
+    def hybridTraining(self, max_loop=1000):
+        loop = 1
+        while ( loop < max_loop):
+            self.lse()
+            a = np.sqrt(self.lossFunction())
+            self.gd()
+            print('Loop: ', loop, '\tLSE RMSE: ', a , '\tGD RMSE: ', np.sqrt(self.lossFunction()))
+            loop += 1
 
-    # Phuong thuc xuat hinh
-    def figure(self):
-        pass
-
-## Kich ban test thu nghiem
+# Su dung bo du lieu WC
 data = np.genfromtxt('w20.csv', delimiter=',')
 x = data[:-1-140,:-1]
 y = data[:-1-140,-1]
-#y = np.asarray([31231., 13212., 41230, 45730, 57320, 12365], dtype=np.float64)
+a = ANFIS(x, y, 'gauss', 2)
 x_test = data[-1-140+1:-1,:-1]
 y_test = data[-1-140+1:-1,-1]
-a = ANFIS(x, y, 'gauss', 5)
-#print(a.half_first([12331, 1231]))
-a.lse()
+
+a.hybridTraining()
 print(np.sqrt(loss_function(a.predict(x_test), y_test)))
 x_axis = np.arange(1, 140, 1)
 pred = plt.plot(x_axis, a.predict(x_test), label='predict')
