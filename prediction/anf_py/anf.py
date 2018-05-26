@@ -1,33 +1,33 @@
 import numpy as np
 import skfuzzy as fuzz
 from skfuzzy import gaussmf, gbellmf, sigmf
-import random 
+import random
 import csv
 import matplotlib.pyplot as plt
 func_dict = {'gaussmf': gaussmf, 'gbellmf': gbellmf, 'sigmf': sigmf}
 
 # Khung chua tham so cho mo hinh ANFIS
 # Hien tai moi chi ho tro 3 loai ham la gauss, gbell va sigmoi
-def frame_parameter(mf: str, rule_number: int, window_size: int): # premise parameters
-    x = [[['gaussmf', {'mean': random.uniform(20000,25000), 'sigma': random.uniform(10000, 15000)}]  for i in np.arange(window_size)] for j in np.arange(rule_number)]
+def frame_parameter(mf: str, rule_number: int, window_size: int, mean1=20000, mean2=25000, sigma1=10000, sigma2=15000): # premise parameters
+    x = [[['gaussmf', {'mean': random.uniform(20.0, 25.0), 'sigma': random.uniform(15.0, 20.0)}] for i in np.arange(window_size)] for j in np.arange(rule_number)]
     return np.asarray(x)
-            
-def consequence_parameter(rule_number: int, window_size: int):    
+
+def consequence_parameter(rule_number: int, window_size: int):
     return np.ones((rule_number, window_size+1), dtype=float)
 
 # Dau ra cua lop dau tien
 # Lop thuc hien tinh toan do mo qua cac tap mo cho truoc
 def first_layer(x:np.ndarray, fp: np.ndarray):
     ws, rn = fp.shape[1], fp.shape[0]
-    temp =  [[func_dict[fp[i][j][0]](x[j], **fp[i][j][1]) for j in np.arange(ws)] 
+    temp =  [[func_dict[fp[i][j][0]](x[j], **fp[i][j][1]) for j in np.arange(ws)]
                 for i in np.arange(rn)]
     return np.asarray(temp)
 
 def loss_function(x, y):
     return ((x - y)**2).mean(axis=0)
-                            
+
 # Dau ra cua lop thu 2
-# Lop thuc hien tinh toan cac luat tu cac tap mo 
+# Lop thuc hien tinh toan cac luat tu cac tap mo
 def second_layer(ofl: np.ndarray):
     ws, rn = ofl.shape[1], ofl.shape[0]
     temp = np.ones(rn, dtype=float)
@@ -38,10 +38,10 @@ def second_layer(ofl: np.ndarray):
 
 # Dau ra cua lop thu 3
 def third_layer(osl: np.ndarray):
-    s = sum(osl)
-    length = osl.shape[0]
-    temp = [osl[i]/s for i in np.arange(length)]
-    return np.asarray(temp)
+    #s = sum(osl)
+    #length = osl.shape[0]
+    #temp = [osl[i]/s for i in np.arange(length)]
+    return osl / osl.sum()
 
 # Dau ra cua lop thu 4
 def fouth_layer(otl: np.ndarray, x:np.ndarray, cp:np.ndarray):
@@ -51,7 +51,7 @@ def fouth_layer(otl: np.ndarray, x:np.ndarray, cp:np.ndarray):
 
 # Dau ra cuoi
 def fifth_layer(ofl: np.ndarray):
-    return sum(ofl) 
+    return sum(ofl)
 
 
 # Dao ham ham loi
@@ -74,7 +74,7 @@ class ANFIS:
             self.window_size = X.shape[1]
         except IndexError as err:
             print('Training input must be 3-d array: ', err)
-            exit(0)               
+            exit(0)
         self.p_para = frame_parameter(self.mf, self.rule_number, self.window_size)
         self.c_para = consequence_parameter(self.rule_number, self.window_size)
 
@@ -86,11 +86,11 @@ class ANFIS:
         layer1 = first_layer(x, self.p_para)
         layer2 = second_layer(layer1)
         return third_layer(layer2)
-    
+
     def half_last(self, hf, x):
         layer4 = fouth_layer(hf, x, self.c_para)
         return fifth_layer(layer4)
-    
+
 
     def f_single(self, x):
         hf = self.half_first(x)
@@ -99,7 +99,7 @@ class ANFIS:
 
     def f_(self, x: np.ndarray):
         return np.asarray([self.f_single(x[i]) for i in np.arange(self.training_size)])
-    
+
     def w_(self, x: np.ndarray):
         return np.asarray([self.half_first(x[i]) for i in np.arange(self.training_size)])
 
@@ -108,12 +108,12 @@ class ANFIS:
         hf = self.half_first(x)
         hl = self.half_last(hf, x)
         return hl
-   
+
     # Su dung de tinh ra mot chuoi cac gia tri du doan tu 1 mang cho truoc
     # Su dung de tinh loss function va in ra man hinh
     def output(self, inp_value):
         return np.asarray([self.output_single(inp_value[i]) for i in np.arange(self.training_size)])
-   
+
     # Dung cho tap test
     def predict(self, x:np.ndarray):
         return np.asarray([self.output_single(x[i]) for i in np.arange(x.shape[0])])
@@ -123,7 +123,10 @@ class ANFIS:
         predict_value = self.output(self.X)
         actual_value = self.Y
         return ((predict_value - actual_value)**2).mean(axis=0)
-    
+
+    def fix_p_para(self, mean1, mean2, sigma1, sigma2):
+        self.p_para = frame_parameter(self.mf, self.rule_number, self.window_size, mean1, mean2, sigma1, sigma2)
+
     def lse(self):
         #print(self.lossFunction())
         # Khai bao
@@ -139,8 +142,8 @@ class ANFIS:
         c = np.dot(np.linalg.pinv(a), y_)
         self.c_para = np.reshape(c, self.c_para.shape)
         #print(self.lossFunction())
-        return 
-    
+        return
+
     # Dao ham ham loi ( lay ham Gauss), tien hanh dao ham cho tat ca cac truong hop
     def derivError(self, mf='gauss', variable='mean'):
         temp = np.zeros(self.p_para.shape)
@@ -158,7 +161,7 @@ class ANFIS:
                     temp[j][i][1] += (y[k] - d[k]) * (d[k] - f[k][j]) * w[k][j] * ((x[k][i] - self.p_para[j][i][1]['sigma'])**2) / (self.p_para[j][i][1]['mean']**3)
         #print('done')
         return temp
-    
+
     def deE(self):
         pass
 
@@ -173,10 +176,9 @@ class ANFIS:
             for j in np.arange(self.window_size):
                 self.p_para[i][j][1]['mean'] -= eta*derivE[i][j][0]
                 self.p_para[i][j][1]['sigma'] -= eta*derivE[i][j][1]
-        loop += 1
 
     # Su dung giai thuat hon hop
-    def hybridTraining(self, max_loop=1000):
+    def hybridTraining(self, max_loop=50):
         loop = 1
         while ( loop < max_loop):
             self.lse()
@@ -186,17 +188,17 @@ class ANFIS:
             loop += 1
 
 # Su dung bo du lieu WC
-data = np.genfromtxt('w20.csv', delimiter=',')
-x = data[:-1-140,:-1]
-y = data[:-1-140,-1]
-a = ANFIS(x, y, 'gauss', 2)
-x_test = data[-1-140+1:-1,:-1]
-y_test = data[-1-140+1:-1,-1]
-
-a.hybridTraining()
-print(np.sqrt(loss_function(a.predict(x_test), y_test)))
-x_axis = np.arange(1, 140, 1)
-pred = plt.plot(x_axis, a.predict(x_test), label='predict')
-act = plt.plot(x_axis, y_test, label='actual')
-plt.legend()
-plt.show()
+#data = np.genfromtxt('w20.csv', delimiter=',')
+#x = data[:-1-140,:-1]
+#y = data[:-1-140,-1]
+#a = ANFIS(x, y, 'gauss', 2)
+#x_test = data[-1-140+1:-1,:-1]
+#y_test = data[-1-140+1:-1,-1]
+#print(x.shape)
+#a.hybridTraining()
+#print(np.sqrt(loss_function(a.predict(x_test), y_test)))
+#x_axis = np.arange(1, 140, 1)
+#pred = plt.plot(x_axis, a.predict(x_test), label='predict')
+#act = plt.plot(x_axis, y_test, label='actual')
+#plt.legend()
+#plt.show()
