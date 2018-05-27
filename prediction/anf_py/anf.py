@@ -1,85 +1,19 @@
+#!/usr/bin/env python
 import numpy as np
-from skfuzzy import gaussmf, gbellmf, sigmf
-import random
-
-func_dict = {'gaussmf': gaussmf, 'gbellmf': gbellmf, 'sigmf': sigmf}
-
-# Khung chua tham so cho mo hinh ANFIS
-# Hien tai moi chi ho tro 3 loai ham la gauss, gbell va sigmoi
-
-
-# random uniform
-def rd(x, y):
-    return random.uniform(x, y)
-
-
-# premise parameter
-def frame_parameter(mf: str, rule_number: int, window_size: int,
-                    mean1=20000, mean2=25000, sigma1=10000, sigma2=15000):
-    x = [[['gaussmf', {'mean': rd(20.0, 25.0), 'sigma': rd(15.0, 20.0)}]
-          for i in np.arange(window_size)] for j in np.arange(rule_number)]
-    return np.asarray(x)
-
-
-def consequence_parameter(rule_number: int, window_size: int):
-    return np.ones((rule_number, window_size+1), dtype=float)
-
-
-# Dau ra cua lop dau tien
-# Lop thuc hien tinh toan do mo qua cac tap mo cho truoc
-def first_layer(x: np.ndarray, fp: np.ndarray):
-    ws, rn = fp.shape[1], fp.shape[0]
-    temp = [[func_dict[fp[i][j][0]](x[j], **fp[i][j][1])
-            for j in np.arange(ws)]
-            for i in np.arange(rn)]
-    return np.asarray(temp)
-
-
-def loss_function(x, y):
-    return ((x - y)**2).mean(axis=0)
-
-
-# Dau ra cua lop thu 2
-# Lop thuc hien tinh toan cac luat tu cac tap mo
-def second_layer(ofl: np.ndarray):
-    ws, rn = ofl.shape[1], ofl.shape[0]
-    temp = np.ones(rn, dtype=float)
-    for i in np.arange(rn):
-        for j in np.arange(ws):
-            temp[i] *= ofl[i][j]
-    return temp
-
-
-# Dau ra cua lop thu 3
-def third_layer(osl: np.ndarray):
-    return osl / osl.sum()
-
-
-# Dau ra cua lop thu 4
-def fouth_layer(otl: np.ndarray, x: np.ndarray, cp: np.ndarray):
-    mat = np.append(x, 1)
-    temp = [otl[i]*np.dot(mat, cp[i]) for i in np.arange(cp.shape[0])]
-    return np.asarray(temp)
-
-
-# Dau ra cuoi
-def fifth_layer(ofl: np.ndarray):
-    return sum(ofl)
-
-
-# Dao ham ham loi
-def er_function(x, y):
-    pass
+from utils import frame_parameter, consequence_parameter, first_layer, \
+                  third_layer, second_layer, fouth_layer, fifth_layer
+import time
 
 
 # Lop chua mo hinh ANFIS
 class ANFIS:
 
     def __init__(self, X: np.ndarray, Y: np.ndarray,
-                 mf: str, rule_number: int):
+                 mf: str, rule_number: int, epoch: int):
         self.X = X  # Training_input
         self.Y = Y  # Training_output
-        self.mf = mf
+        self.mf = mf  # Xac dinh tap mo su dung
+        self.epoch = epoch
         self.training_size = X.shape[0]
         self.rule_number = rule_number  # So luat trong mang ANFIS
         if (X.shape[0] != Y.shape[0]):
@@ -95,8 +29,10 @@ class ANFIS:
         self.c_para = consequence_parameter(self.rule_number, self.window_size)
 
     def summary(self):  # Tong hop mo hinh mang ANFIS
+        print('ANFIS summary')
         print('Training size: ', self.X.shape[0])
         print('Rule number  : ', self.rule_number)
+        print('Window size  : ', self.window_size)
 
     def half_first(self, x: np.ndarray):
         layer1 = first_layer(x, self.p_para)
@@ -122,9 +58,27 @@ class ANFIS:
 
     # Phuong thuc du doan theo dau vao voi tham so trong mo hinh
     def output_single(self, x: np.ndarray):
-        hf = self.half_first(x)
-        hl = self.half_last(hf, x)
+        hf = self.half_first(x)  # w_
+        wf = fouth_layer(hf, x, self.c_para)  # f_
+        hl = fifth_layer(wf)  # output_single_chuan
         return hl
+
+    def genValSingle(self, x: np.ndarray):
+        hf_single = self.half_first(x)  # w_single
+        wf_single = fouth_layer(hf_single, x, self.c_para)  # f_single
+        hl_single = fifth_layer(wf_single)  # output_single_chuan
+        return hf_single, wf_single, hl_single
+
+    def genVal(self, x: np.ndarray):
+        w = []
+        f = []
+        o = []
+        for i in np.arange(x.shape[0]):
+            ws, fs, os = self.genValSingle(x[i])
+            w.append(ws)
+            f.append(fs)
+            o.append(os)
+        return w, f, o
 
     # Su dung de tinh ra mot chuoi cac gia tri du doan tu 1 mang cho truoc
     # Su dung de tinh loss function va in ra man hinh
@@ -143,6 +97,7 @@ class ANFIS:
         actual_value = self.Y
         return ((predict_value - actual_value)**2).mean(axis=0)
 
+    # Dung de chinh sua tham so khoi tao tuy thuoc vao du lieu train
     def fix_p_para(self, mean1, mean2, sigma1, sigma2):
         self.p_para = frame_parameter(self.mf, self.rule_number,
                                       self.window_size, mean1,
@@ -160,7 +115,7 @@ class ANFIS:
             for j in np.arange(self.rule_number):
                 for k in np.arange(self.window_size):
                     a[i][j*(self.window_size+1)+k] = w[i][j]*self.X[i][k]
-                a[i][j*(self.window_size+1)+self.window_size] = w[i][j]
+                    a[i][j*(self.window_size+1)+self.window_size] = w[i][j]
         c = np.dot(np.linalg.pinv(a), y_)
         self.c_para = np.reshape(c, self.c_para.shape)
 
@@ -168,17 +123,18 @@ class ANFIS:
     # Tien hanh dao ham cho tat ca cac truong hop
     def derivError(self, mf='gauss', variable='mean'):
         temp = np.zeros(self.p_para.shape)
-        d = self.predict(self.X)
         y = self.Y
         x = self.X
-        w = self.w_(self.X)
+        # f = self.f_(self.X)
+        # w = self.w_(self.X)
+        w, f, d = self.genVal(self.X)
         for k in np.arange(self.training_size):
-            for i in np.arange(self.window_size):
-                for j in np.arange(self.rule_number):
+            for j in np.arange(self.rule_number):
+                half_delta = (y[k] - d[k]) * (d[k] - f[k][j]) * w[k][j]
+                for i in np.arange(self.window_size):
                     # sigma
                     sigma = self.p_para[j][i][1]['sigma']
                     mean = self.p_para[j][i][1]['mean']
-                    half_delta = (y[k] - d[k]) * (d[k] - d[k][j]) * w[k][j]
                     temp[j][i][0] += half_delta * ((x[k][i] - sigma)) / \
                         (mean**2)
                     # mean
@@ -196,12 +152,15 @@ class ANFIS:
                 self.p_para[i][j][1]['sigma'] -= eta*derivE[i][j][1]
 
     # Su dung giai thuat hon hop
-    def hybridTraining(self, max_loop=50):
+    def hybridTraining(self):
+        print("Starting training ...")
         loop = 1
-        while (loop < max_loop):
+        while (loop < self.epoch):
+            timer = time.time()
             self.lse()
-            a = np.sqrt(self.lossFunction())
             self.gd()
-            print('Loop: ', loop, '\tLSE RMSE: ', a, '\tGD RMSE: ',
-                  np.sqrt(self.lossFunction()))
+            print('Loop: ', loop, '/', self.epoch,  '\tTime: ',
+                  time.time() - timer)
             loop += 1
+        print(" Training completed!")
+        self.summary()

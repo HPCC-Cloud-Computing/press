@@ -1,9 +1,18 @@
+#!/usr/bin/env python
 import numpy as np
 import pandas as pd
 import anf as anfis
 import matplotlib.pyplot as plt
 
+# Cac hang so
+TRAIN_PERCENTAGE = 0.8
+WINDOW_SIZE = 20
+RULE_NUMBER = 5
+
+# Khai bao file
+# Ten file
 fname = "google_trace_timeseries/data_resource_usage_10Minutes_6176858948.csv"
+# Cac Header trong file
 header = ["time_stamp", "numberOfTaskIndex", "numberOfMachineId",
           "meanCPUUsage", "canonical memory usage", "AssignMem",
           "unmapped_cache_usage", "page_cache_usage", "max_mem_usage",
@@ -11,10 +20,12 @@ header = ["time_stamp", "numberOfTaskIndex", "numberOfMachineId",
           "max_disk_io_time", "cpi", "mai",
           "sampling_portion", "agg_type", "sampled_cpu_usage"]
 
+# Lay du lieu tu file csv
 df = pd.read_csv(fname, names=header)
 mean_cpu_usage = df['meanCPUUsage']
 
 
+# Ham generate du lieu tu file ra data ma ANFIS co the train duoc
 def gen_to_data(ss, window_size, attribute):
     window_size += 1
     d = np.asarray(ss[attribute])
@@ -27,8 +38,8 @@ def gen_to_data(ss, window_size, attribute):
     return temp_data
 
 
-data = np.asarray(gen_to_data(df, 20, 'meanCPUUsage'))
-train_size = int(data.shape[0]*0.8)
+data = np.asarray(gen_to_data(df, WINDOW_SIZE, 'meanCPUUsage'))
+train_size = int(data.shape[0]*TRAIN_PERCENTAGE)
 test_size = data.shape[0] - train_size
 
 # Training data
@@ -39,11 +50,16 @@ y = data[:train_size, -1]
 x_test = data[train_size:, :-1]
 y_test = data[train_size:, -1]
 
-print(x_test.shape[0])
-print(test_size)
-a = anfis.ANFIS(x, y, 'gauss', 2)
+# Dua du lieu vao ben trong va train
+mean1, mean2, sigma1, sigma2 = 20.0, 25.0, 15.0, 20.0
+a = anfis.ANFIS(x, y, 'gauss', RULE_NUMBER, epoch=100)
+a.fix_p_para(mean1, mean2, sigma1, sigma2)
 a.hybridTraining()
+
+# In ra gia tri test
 print('test RMSE: ', np.sqrt(anfis.loss_function(a.predict(x_test), y_test)))
+
+# Xuat ra hinh anh so sanh voi du lieu thuc te
 x_axis = np.arange(0, test_size, 1)
 pred = plt.plot(x_axis, a.predict(x_test), label='predict')
 act = plt.plot(x_axis, y_test, label='actual')
