@@ -2,10 +2,8 @@ from __future__ import print_function, division
 
 import csv
 import numpy as np
-from utils import get_data, compared_diagram
 from keras.layers import Convolution1D, Dense, MaxPooling1D, Flatten
 from keras.models import Sequential
-from sklearn.metrics import mean_squared_error
 
 # Tham so lien quan den neural network
 NUMBER_TIME_SERIES = 1
@@ -24,14 +22,17 @@ END_DAY = 10
 
 
 # Thiet lap neural network
-def neural_network(window_size, filter_length, nb_input_series=NUMBER_TIME_SERIES,
+def neural_network(window_size, filter_length,
+                   nb_input_series=NUMBER_TIME_SERIES,
                    nb_outputs=NUMBER_OUTPUTS, nb_filter=NUMBER_FEATURE_MAPS):
     model = Sequential((
         Convolution1D(nb_filter=nb_filter, filter_length=filter_length,
-                      activation='relu', input_shape=(window_size, nb_input_series)),
+                      activation='relu',
+                      input_shape=(window_size, nb_input_series)),
         MaxPooling1D(),
 
-        Convolution1D(nb_filter=nb_filter, filter_length=filter_length, activation='relu'),
+        Convolution1D(nb_filter=nb_filter, filter_length=filter_length,
+                      activation='relu'),
         MaxPooling1D(),
 
         Flatten(),
@@ -67,11 +68,17 @@ def evaluate_timeseries(window_size):
                            filter_length=filter_length, nb_input_series=1,
                            nb_outputs=1, nb_filter=nb_filter)
     model.summary()
-    x, y, q= make_timeseries_instances()
+    x, y, q = make_timeseries_instances()
     test_size = int(0.2 * len(y))
-    x_train, x_test, y_train, y_test = x[:-test_size], x[-test_size:], y[:-test_size], y[-test_size:]
-    model.fit(x_train, y_train, nb_epoch=NUMBER_EPOCH, batch_size=BATCH_SIZE, validation_data=(x_test, y_test))
+    x_train, x_test, y_train, y_test = x[:-test_size], x[-test_size:], y[
+                                                                       :-test_size], y[
+                                                                                     -test_size:]
+    model.fit(x_train, y_train, nb_epoch=NUMBER_EPOCH, batch_size=BATCH_SIZE,
+              validation_data=(x_test, y_test))
     pred = model.predict(x_test)
+
+    return pred
+
 
 def main():
     # Khai bao cac tham so trong CNN

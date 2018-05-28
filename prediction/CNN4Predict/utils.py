@@ -9,7 +9,8 @@ INTERVAL_BY_SECOND = 600
 
 # Month converter function
 def month_converter(month):
-    months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
+    months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep',
+              'Oct', 'Nov', 'Dec']
     return months.index(month) + 1
 
 
@@ -38,7 +39,8 @@ class ExecuteLine(object):
             hms = hms.split(':')
             dt = temp_time[0][:temp_time[0].index(':')].split('/')
             since = datetime(1970, 8, 15, 0, 0, 0)
-            time_sample = datetime(int(dt[2]), month_converter(dt[1]), int(dt[0]), int(hms[0]), int(hms[1]),
+            time_sample = datetime(int(dt[2]), month_converter(dt[1]),
+                                   int(dt[0]), int(hms[0]), int(hms[1]),
                                    int(hms[2]))
         except ValueError:
             return 0
@@ -56,10 +58,12 @@ class CountRequest(object):
         count_line = 0
         temp_request_list = []
 
-        with codecs.open(self.file, "r", encoding='utf-8', errors='ignore') as f:
+        with codecs.open(self.file, "r", encoding='utf-8',
+                         errors='ignore') as f:
             for line in f:
                 time_element = ExecuteLine(line).convert_time()
-                condition_append_list = math.floor((int(time_element) - min_value) / self.interval) >= len(
+                condition_append_list = math.floor(
+                    (int(time_element) - min_value) / self.interval) >= len(
                     temp_request_list)
                 if time_element == 0:
                     continue
@@ -73,7 +77,8 @@ class CountRequest(object):
         return temp_request_list
 
     def output(self, output_file):
-        with codecs.open(output_file, "wb+", encoding='utf-8', errors='ignore') as f:
+        with codecs.open(output_file, "wb+", encoding='utf-8',
+                         errors='ignore') as f:
             for element in self.request_list():
                 f.write(str(element) + '\n')
 
@@ -81,7 +86,8 @@ class CountRequest(object):
 # Xu ly tren tung file mot
 def get_single_data(targeted_file):
     temp_list = []
-    with codecs.open(targeted_file, "r", encoding='utf-8', errors='ignore') as f:
+    with codecs.open(targeted_file, "r", encoding='utf-8',
+                     errors='ignore') as f:
         for e in f:
             temp_list.append(int(e))
     return temp_list
@@ -93,9 +99,11 @@ def get_data(start, end, interval):
     temp_output = []
     for index in s:
         if index < 10:
-            targeted_file = 'dataset_folder/wc_day' + '0' + str(index) + '_1_' + str(interval) + '.out'
+            targeted_file = 'dataset_folder/wc_day' + '0' + str(
+                index) + '_1_' + str(interval) + '.out'
         else:
-            targeted_file = 'dataset_folder/wc_day' + str(index) + '_1_' + str(interval) + '.out'
+            targeted_file = 'dataset_folder/wc_day' + str(index) + '_1_' + str(
+                interval) + '.out'
         temp_output += get_single_data(targeted_file)
     return temp_output
 
@@ -110,7 +118,8 @@ def rmse(a, b):
 
 
 # Diagram between predicted time series and actual time series
-def compared_diagram(predicted_series, actual_series, window_size, is_matrix = True):
+def compared_diagram(predicted_series, actual_series, window_size,
+                     is_matrix=True):
     x_axis = np.arange(0, len(predicted_series)) / 3600 * INTERVAL_BY_SECOND
     plt.plot(x_axis, predicted_series)
     plt.plot(x_axis, actual_series)
@@ -118,11 +127,13 @@ def compared_diagram(predicted_series, actual_series, window_size, is_matrix = T
     plt.ylabel('Requests number by interval')
     plt.xlim([0, 24])
     plt.title('Worldcup 98 data: Day 10')
-    plt.legend(['Predicted time series ( window size = '+str(window_size)+')', 'Actual time series'], loc='upper left')
+    plt.legend(
+        ['Predicted time series ( window size = ' + str(window_size) + ')',
+         'Actual time series'], loc='upper left')
     if is_matrix:
         plt.savefig('figure/matrix/ws' + str(window_size) + '.png')
     else:
-        plt.savefig('figure/ws'+str(window_size)+'.png')
+        plt.savefig('figure/ws' + str(window_size) + '.png')
 
 
 def compared_shift_diagram(predicted_series, actual_series, shift_index):
@@ -133,7 +144,9 @@ def compared_shift_diagram(predicted_series, actual_series, shift_index):
     plt.ylabel('Requests number by interval')
     plt.xlim([0, 24])
     plt.title('Worldcup 98 data: Day 10')
-    plt.legend(['Predicted time series ( shift_index = '+str(shift_index)+')', 'Actual time series'], loc='upper left')
+    plt.legend(
+        ['Predicted time series ( shift_index = ' + str(shift_index) + ')',
+         'Actual time series'], loc='upper left')
     if shift_index < 10:
         plt.savefig('figure/shift-' + '0' + str(shift_index) + '.png')
     else:

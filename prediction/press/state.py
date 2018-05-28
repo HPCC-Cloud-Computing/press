@@ -15,7 +15,7 @@ class StatePredictor(object):
         return int(np.floor((value - self.min_value) / self.width))
 
     # Hàm xây dựng ma trận chuyển trạng thái
-    # Input: 
+    # Input:
     #       -chuỗi thời gian
     #       -M: số trạng thái
     #       -max_value: giá trị lớn nhất của tài nguyên
@@ -28,12 +28,12 @@ class StatePredictor(object):
         s = [self.state(value) for value in self.time_series]
         for i in range(len(s) - 1):
             p[s[i]][s[i + 1]] += 1
-        for i in range(M):
+        for i in range(self.M):
             s = sum(p[i])
             if s != 0:
                 p[i] = p[i] / sum(p[i])
             else:
-                p[i] = p[i] / M
+                p[i] = p[i] / self.M
         return np.matrix(p)
 
     # Dự báo trạng thái

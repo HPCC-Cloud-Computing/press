@@ -4,6 +4,7 @@ from math import ceil, floor
 import csv
 import argparse
 from utils import get_single_data, get_data
+
 # Cac hang so va gia tri mac dinh
 DEFAULT_INPUT_FILE_DIRECTORY = "input.txt"
 DEFAULT_OUTPUT_FILE_DIRECTORY = "output.csv"
@@ -33,7 +34,8 @@ def request_to_box(input_request_list, box_max_request=DEFAULT_MAX_BOX_REQUEST):
                 temp_box_list.append(temp_box_element)
         return temp_box_list
     else:
-        print("Invalid box_max_request Value ! It must be an integer and positive.")
+        print(
+            "Invalid box_max_request Value ! It must be an integer and positive.")
         return None
 
 
@@ -50,8 +52,10 @@ def represent_vector_value(vector):
 
 
 # Ham xuat ra cac bo Vector, nhan
-def request_to_sets(input_request_list, box_max_request=DEFAULT_MAX_BOX_REQUEST, vector_size=DEFAULT_VECTOR_SIZE,
-                    scale_in_max=DEFAULT_SCALE_IN_MAX, scale_out_max=DEFAULT_SCALE_OUT_MAX):
+def request_to_sets(input_request_list, box_max_request=DEFAULT_MAX_BOX_REQUEST,
+                    vector_size=DEFAULT_VECTOR_SIZE,
+                    scale_in_max=DEFAULT_SCALE_IN_MAX,
+                    scale_out_max=DEFAULT_SCALE_OUT_MAX):
     box_list = request_to_box(input_request_list, box_max_request)
     if len(box_list) > vector_size:
         col_number = vector_size + 1
@@ -82,20 +86,39 @@ if __name__ == '__main__':
 
     # Khai bao tham so dong lenh chuyen vao
     parser = argparse.ArgumentParser()
-    parser.add_argument("-o", "--output", help="Path to output file. Default value = "
-                                               + str(DEFAULT_INPUT_FILE_DIRECTORY))  # Input file directory
-    parser.add_argument("-i", "--input", help="Path to input file. Default value = "
-                        + str(DEFAULT_OUTPUT_FILE_DIRECTORY))  # Output file directory
+
+    # Input file directory
+    parser.add_argument("-o", "--output",
+                        help="Path to output file. Default value = "
+                             + str(DEFAULT_INPUT_FILE_DIRECTORY))
+    # Output file directory
+    parser.add_argument("-i", "--input",
+                        help="Path to input file. Default value = "
+                             + str(DEFAULT_OUTPUT_FILE_DIRECTORY))
+
+    # Box max request
     parser.add_argument("--bmr", help="Box max request. Default value = "
-                        + str(DEFAULT_MAX_BOX_REQUEST))  # Box max request
+                                      + str(DEFAULT_MAX_BOX_REQUEST))
+
+    # Vector size
     parser.add_argument("--vs", help="Vector size. Default value = "
-                        + str(DEFAULT_VECTOR_SIZE))  # Vector size
+                                     + str(DEFAULT_VECTOR_SIZE))
+
+    # Scale in max
     parser.add_argument("--sim", help="Scale in max. Default value = "
-                        + str(DEFAULT_SCALE_IN_MAX))  # Scale in max
+                                      + str(DEFAULT_SCALE_IN_MAX))
+
+    # Scale out max
     parser.add_argument("--som", help="Scale out max. Default value = "
-                        + str(DEFAULT_SCALE_OUT_MAX))  # Scale out max
-    parser.add_argument("--start", help="Start day for World Cup dataset")  # Start day dataset
-    parser.add_argument("--end", help="End day for World Cup dataset")  # End day dataset
+                                      + str(DEFAULT_SCALE_OUT_MAX))
+
+    # Start day dataset
+    parser.add_argument("--start",
+                        help="Start day for World Cup dataset")
+
+    # End day dataset
+    parser.add_argument("--end",
+                        help="End day for World Cup dataset")
     args = vars(parser.parse_args())
     print("Reading files ...")
     # Kiem tra voi tung tham so dong lenh
@@ -103,7 +126,7 @@ if __name__ == '__main__':
         if args.get("start", None) is None and args.get("end", None) is None:
             input_file_name = DEFAULT_INPUT_FILE_DIRECTORY
             request_list = get_single_data(input_file_name)
-        elif int(args["end"])>=int(args["start"]):
+        elif int(args["end"]) >= int(args["start"]):
             request_list = get_data(int(args["start"]), int(args["end"]))
         else:
             print("Error! Start day can't be greater than end day")
@@ -111,7 +134,8 @@ if __name__ == '__main__':
         input_file_name = args["input"]
         request_list = get_single_data(input_file_name)
     else:
-        print("Syntax Error! Please check command again or type python preprocess -h to get more information")
+        print(
+            "Syntax Error! Please check command again or type python preprocess -h to get more information")
         exit(1)
     print("Success !!")
     print("Processing ...")
@@ -139,10 +163,11 @@ if __name__ == '__main__':
         som = DEFAULT_SCALE_OUT_MAX
     else:
         som = args["som"]
+
     t = request_to_sets(request_list, box_max_request=bmr, vector_size=vs,
                         scale_in_max=sim, scale_out_max=som)
     print("Success !!")
-    print("Writing output file "+str(output_file_name)+" ...")
+    print("Writing output file " + str(output_file_name) + " ...")
     with open(output_file_name, "w+") as my_csv:
         csvWriter = csv.writer(my_csv, delimiter=',')
         csvWriter.writerows(t)
