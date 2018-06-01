@@ -3,12 +3,14 @@ import numpy as np
 import pandas as pd
 import anf as anfis
 import matplotlib.pyplot as plt
-
+from utils import loss_function
+from datetime import datetime
 # Cac hang so
 TRAIN_PERCENTAGE = 0.8
-WINDOW_SIZE = 20
+WINDOW_SIZE = 50
 RULE_NUMBER = 5
-
+ATTRIBUTE = 'meanCPUUsage'
+EPOCH = 500
 # Khai bao file
 # Ten file
 fname = "google_trace_timeseries/data_resource_usage_10Minutes_6176858948.csv"
@@ -22,7 +24,7 @@ header = ["time_stamp", "numberOfTaskIndex", "numberOfMachineId",
 
 # Lay du lieu tu file csv
 df = pd.read_csv(fname, names=header)
-mean_cpu_usage = df['meanCPUUsage']
+mean_cpu_usage = df[ATTRIBUTE]
 
 
 # Ham generate du lieu tu file ra data ma ANFIS co the train duoc
@@ -38,30 +40,54 @@ def gen_to_data(ss, window_size, attribute):
     return temp_data
 
 
-data = np.asarray(gen_to_data(df, WINDOW_SIZE, 'meanCPUUsage'))
-train_size = int(data.shape[0]*TRAIN_PERCENTAGE)
-test_size = data.shape[0] - train_size
+def logging(ws: int, nr: int, trs, ts, ep, error, attribute: str):
+    with open('logs/result.txt', 'a') as f:
+        f.write('---> ' + str(datetime.now()) + '<---' + '\n')
+        f.write('\t' + '[+] Arttibute\t\t: ' + attribute + '\n')
+        f.write('\t' + '[+] Test size\t\t: ' + str(ts) + '\n')
+        f.write('\t' + '[+] Training size\t: ' + str(trs) + '\n')
+        f.write('\t' + '[+] Window size\t\t: ' + str(ws) + '\n')
+        f.write('\t' + '[+] Rule number\t\t: ' + str(nr) + '\n')
+        f.write('\t' + '[+] Epoch\t\t: ' + str(ep) + '\n')
+        f.write('\t' + '[+] RMSE\t\t: ' + str(error) + '\n\n')
 
-# Training data
-x = data[:train_size, :-1]
-y = data[:train_size, -1]
 
-# Test data
-x_test = data[train_size:, :-1]
-y_test = data[train_size:, -1]
+def main():
+    data = np.asarray(gen_to_data(df, WINDOW_SIZE, 'meanCPUUsage'))
+    train_size = int(data.shape[0]*TRAIN_PERCENTAGE)
+    test_size = data.shape[0] - train_size
 
-# Dua du lieu vao ben trong va train
-mean1, mean2, sigma1, sigma2 = 20.0, 25.0, 15.0, 20.0
-a = anfis.ANFIS(x, y, 'gauss', RULE_NUMBER, epoch=100)
-a.fix_p_para(mean1, mean2, sigma1, sigma2)
-a.hybridTraining()
+    # Training data
+    x = data[:train_size, :-1]
+    y = data[:train_size, -1]
 
-# In ra gia tri test
-print('test RMSE: ', np.sqrt(anfis.loss_function(a.predict(x_test), y_test)))
+    # Test data
+    x_test = data[train_size:, :-1]
+    y_test = data[train_size:, -1]
 
-# Xuat ra hinh anh so sanh voi du lieu thuc te
-x_axis = np.arange(0, test_size, 1)
-pred = plt.plot(x_axis, a.predict(x_test), label='predict')
-act = plt.plot(x_axis, y_test, label='actual')
-plt.legend()
-plt.show()
+    # Dua du lieu vao ben trong va train
+    mean1, mean2, sigma1, sigma2 = 20.0, 25.0, 15.0, 20.0
+    a = anfis.ANFIS(x, y, 'gauss', RULE_NUMBER, epoch=EPOCH)
+    a.fix_p_para(mean1, mean2, sigma1, sigma2)
+    a.hybridTraining()
+
+    # In ra gia tri test
+
+    test_error = np.sqrt(loss_function(a.predict(x_test), y_test))
+    print('test RMSE: ', test_error)
+    logging(WINDOW_SIZE, RULE_NUMBER, train_size, test_size, EPOCH,
+            test_error, ATTRIBUTE)
+
+    # Xuat ra hinh anh so sanh voi du lieu thuc te
+    x_axis = np.arange(0, test_size, 1)
+    plt.title('Google cluter timeseries: ' + str(ATTRIBUTE))
+    plt.plot(x_axis, a.predict(x_test), label='predict')
+    plt.plot(x_axis, y_test, label='actual')
+    plt.legend()
+    plt.savefig('figures/' + str(RULE_NUMBER) + '_'+str(EPOCH)
+                + '_' + str(WINDOW_SIZE) + '.png', dpi=300)
+    plt.show()
+
+
+if __name__ == "__main__":
+    main()

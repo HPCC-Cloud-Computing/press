@@ -154,12 +154,12 @@ class ANFIS:
     # Su dung giai thuat hon hop
     def hybridTraining(self):
         print("Starting training ...")
-        loop = 1
+        loop = 0
         while (loop < self.epoch):
             timer = time.time()
             self.lse()
             self.gd()
-            print('Loop: ', loop, '/', self.epoch,  '\tTime: ',
+            print('Loop: \t', loop, '/', self.epoch, '\tTime: \t',
                   time.time() - timer)
             loop += 1
         print(" Training completed!")
