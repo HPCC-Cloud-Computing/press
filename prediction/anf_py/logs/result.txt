@@ -1,0 +1,9 @@
+--> 2018-06-01 05:34:29.579065<---
+	[+] Arttibute		: meanCPUUsage
+	[+] Test size		: 825
+	[+] Training size	: 3300
+	[+] Window size		: 50
+	[+] Rule number		: 5
+	[+] Epoch		: 500
+	[+] RMSE		: 0.4903424601320094
+
