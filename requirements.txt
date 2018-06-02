@@ -1,0 +1,6 @@
+# anfis
+scikit-fuzzy
+matplotlib
+
+pandas
+
