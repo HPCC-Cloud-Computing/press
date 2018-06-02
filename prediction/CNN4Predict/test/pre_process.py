@@ -1,5 +1,6 @@
 import numpy as np
 
+
 # Test
 class GAF(object):
     def __init__(self, time_series):
@@ -47,5 +48,6 @@ class GAF(object):
         x_ = self.normalize_time_series()
         for i in np.arange(n):
             for j in np.arange(n):
-                initial_matrix[i][j] = x_[i] * x_[j] - np.sqrt(1 - x_[i]*x_[i])*np.sqrt(1-x_[j]*x_[j])
+                initial_matrix[i][j] = x_[i] * x_[j] - np.sqrt(
+                    1 - x_[i] * x_[i]) * np.sqrt(1 - x_[j] * x_[j])
         return initial_matrix

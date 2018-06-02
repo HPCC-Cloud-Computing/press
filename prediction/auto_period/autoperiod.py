@@ -1,10 +1,6 @@
-import matplotlib.pyplot as plt
-import random
-import execfile as ex
 import numpy as np
 import matplotlib.pyplot as plt
 import math
-
 
 SEQUENCE = 0
 PERIODGRAM = 1
@@ -16,8 +12,8 @@ DEFAULT_PEAK_PERCENT = 99
 
 class Autoperiod(object):
 
-    def __init__(self, time_series = [], interval = DEFAULT_INTERVAL_VALUE,
-                                    peak_percent = DEFAULT_PEAK_PERCENT):
+    def __init__(self, time_series=[], interval=DEFAULT_INTERVAL_VALUE,
+                 peak_percent=DEFAULT_PEAK_PERCENT):
 
         self.time_series = time_series
         self.interval = interval
@@ -32,7 +28,7 @@ class Autoperiod(object):
 
     def get_ESD(self):
         a = self.fft()
-        return np.abs(a**2)
+        return np.abs(a ** 2)
 
     def ACF_list(self):
         s = []
@@ -43,8 +39,9 @@ class Autoperiod(object):
     # In ra bieu do cua tung dang cu the
     def diagram(self, n):
 
-        if n==PERIODGRAM:
-            x_axis = np.arange(3, len(self.get_ESD()))/float(2*len(self.get_ESD()))
+        if n == PERIODGRAM:
+            x_axis = np.arange(3, len(self.get_ESD())) / float(
+                2 * len(self.get_ESD()))
             a = self.get_ESD()[3:]
             plt.xlabel('Frequency')
             plt.ylabel('Power')
@@ -52,15 +49,15 @@ class Autoperiod(object):
             plt.plot(x_axis, a)
             plt.show()
 
-        if n==SEQUENCE:
-            x_axis = np.arange(0, self.length_series())/3600*self.interval
+        if n == SEQUENCE:
+            x_axis = np.arange(0, self.length_series()) / 3600 * self.interval
             plt.plot(x_axis, self.time_series)
             plt.xlabel('Hours')
             plt.ylabel('Requests number by interval')
             plt.title('Sequence diagram')
             plt.show()
 
-        if n==ACF:
+        if n == ACF:
             plt.xlabel('Tau')
             plt.ylabel('ACF_value')
             plt.title('Circular Autocorrection')
@@ -71,14 +68,15 @@ class Autoperiod(object):
     def get_ACF(self, tau):
         tempACF = 0
         for i in range(self.length_series()):
-            if i+tau==self.length_series():
+            if i + tau == self.length_series():
                 break
-            tempACF += self.time_series[tau]*self.time_series[i+tau]
-        return float(tempACF)/float(self.length_series())
+            tempACF += self.time_series[tau] * self.time_series[i + tau]
+        return float(tempACF) / float(self.length_series())
 
     # Lay cac chu ki trien vong dua vao kiem tra
     def period_hints(self):
-        threshold = math.floor(self.length_series()*(100-self.peak_percent)/100.0)
+        threshold = math.floor(
+            self.length_series() * (100 - self.peak_percent) / 100.0)
         # Lay danh sach cac phan tu co nang luong lon nhat
 
         period_temp_list = []
@@ -97,9 +95,13 @@ class Autoperiod(object):
                 continue
             else:
                 # Kiem tra dieu kien ACF
-                check_acf = (self.ACF_list()[hint_index] >= (self.ACF_list()[hint_index-1]+self.ACF_list()[hint_index+1])/2)
+                check_acf = (self.ACF_list()[hint_index]
+                             >= (self.ACF_list()[hint_index - 1]
+                                 + self.ACF_list()[hint_index + 1]) / 2)
+
                 if check_acf:
                     index_hint_list.append(hint_index)
-                    temp_period_element = math.floor(float(self.length_series())/hint_index)
+                    temp_period_element = math.floor(
+                        float(self.length_series()) / hint_index)
                     period_temp_list.append(temp_period_element)
         return period_temp_list

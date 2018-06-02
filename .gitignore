@@ -138,3 +138,7 @@ crashlytics-build.properties
 
 # Mac OS X hidden files
 .DS_Store
+
+# Ignore tmp
+tmp/
+

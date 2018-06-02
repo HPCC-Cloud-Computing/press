@@ -12,15 +12,15 @@ class SignaturePredictor(object):
 
     def set_sampling_rate(self, sampling_rate):
         self.sampling_rate = sampling_rate
-    
+
     def get_time_series(self):
         return self.time_series
 
-    def set_sampling_rate(self):
+    def get_sampling_rate(self):
         return self.sampling_rate
 
     # Xác định giá trị dominant frequency
-    # Input: Chuỗi thời gian 
+    # Input: Chuỗi thời gian
     # Output: dominant frequency
     def dominant_freq(self):
         n = len(self.time_series)
@@ -43,12 +43,12 @@ class SignaturePredictor(object):
         # Chia time series thành q pattern window bằng nhau
         p = []
         for i in range(q):
-            p.append(self.time_series[i*z : (i+1)*z])
-            
+            p.append(self.time_series[i * z: (i + 1) * z])
+
         # Xác định sự tương quan giữa 2 pattern window:
         # 2 pattern window tương quan nếu hệ số tương quan >= 0.85 và tỉ số giá trị trung bình >= 0.95
         for i in range(q):
-            for j in range(i+1, q):
+            for j in range(i + 1, q):
                 relation = pearsonr(p[i], p[j])
                 if abs(relation[0]) < 0.85:
                     return None
@@ -60,4 +60,3 @@ class SignaturePredictor(object):
         for i in range(z):
             signature[i] = sum(p[j][i] for j in range(q)) / q
         return signature
-      

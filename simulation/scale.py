@@ -1,5 +1,6 @@
 import math
 
+
 class Scale(object):
     def __init__(self, nbox, start_box, box_capacity, warm_up_time, cost):
         """
@@ -16,7 +17,7 @@ class Scale(object):
 
     def scale(self, data, interval=1):
         """
-        Input: 
+        Input:
             data: array
             interval
         Output:

@@ -1,8 +1,7 @@
-import matplotlib.pyplot as plt;
-
-plt.rcdefaults()
 import numpy as np
 import matplotlib.pyplot as plt
+
+plt.rcdefaults()
 
 objects = ('20', '30', '50')
 y_pos = np.arange(len(objects))

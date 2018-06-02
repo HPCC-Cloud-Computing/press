@@ -14,5 +14,6 @@ def make_timeseries_instances():
     x = np.atleast_3d(x)
     return x, y
 
+
 x, y = make_timeseries_instances()
 print(y)

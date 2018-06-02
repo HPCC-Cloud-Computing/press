@@ -15,4 +15,4 @@ class SlidingWindow:
             self.index += 1
             return self.data[(self.index - 1):(self.index - 1) + self.size]
         else:
-            raise StopIteration 
+            raise StopIteration
