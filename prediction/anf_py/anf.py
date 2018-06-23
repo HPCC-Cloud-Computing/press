@@ -143,7 +143,7 @@ class ANFIS:
         return temp
 
     # Su dung GD
-    def gd(self, epochs=1, eta=0.01, k=0.95):
+    def gd(self, epochs=1, eta=0.01, k=0.9):
         derivE = self.derivError('gauss', 'mean')
         #  Xu ly voi cac tham so mean
         for i in np.arange(self.rule_number):
@@ -155,12 +155,17 @@ class ANFIS:
     def hybridTraining(self):
         print("Starting training ...")
         loop = 0
+        counter_gd = 0  # Bien dem so lan thuc hien gd trong 1 epoch
+        max_gd = 20  # So thuc hien gd trong 1 epoch
         while (loop < self.epoch):
             timer = time.time()
             self.lse()
-            self.gd()
+            while(counter_gd < max_gd):
+                self.gd()
+                counter_gd += 1
+            counter_gd = 0
             print('Loop: \t', loop, '/', self.epoch, '\tTime: \t',
                   time.time() - timer)
             loop += 1
-        print(" Training completed!")
+        print("Training completed!")
         self.summary()

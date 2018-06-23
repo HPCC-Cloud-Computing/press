@@ -2,6 +2,7 @@
 import numpy as np
 from skfuzzy import gaussmf, gbellmf, sigmf
 import random
+from sklearn.metrics import mean_squared_error as mse
 
 """
     Cac ham phu tro cua ANFIS duoc de tai day
@@ -38,7 +39,7 @@ def first_layer(x: np.ndarray, fp: np.ndarray):
 
 
 def loss_function(x, y):
-    return ((x - y)**2).mean(axis=0)
+    return mse(x, y)
 
 
 # Dau ra cua lop thu 2

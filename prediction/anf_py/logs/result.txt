@@ -7,3 +7,84 @@
 	[+] Epoch		: 500
 	[+] RMSE		: 0.4903424601320094
 
+---> 2018-06-02 15:54:00.976569<---
+	[+] Arttibute		: meanCPUUsage
+	[+] Test size		: 835
+	[+] Training size	: 3339
+	[+] Window size		: 1
+	[+] Rule number		: 5
+	[+] Epoch		: 50
+	[+] RMSE		: 551178.2715685796
+
+---> 2018-06-02 15:54:48.514978<---
+	[+] Arttibute		: meanCPUUsage
+	[+] Test size		: 835
+	[+] Training size	: 3339
+	[+] Window size		: 1
+	[+] Rule number		: 2
+	[+] Epoch		: 50
+	[+] RMSE		: 0.573075914817304
+
+---> 2018-06-02 16:03:49.760281<---
+	[+] Arttibute		: meanCPUUsage
+	[+] Test size		: 835
+	[+] Training size	: 3339
+	[+] Window size		: 1
+	[+] Rule number		: 2
+	[+] Epoch		: 50
+	[+] RMSE		: 1.4536164916932315
+
+---> 2018-06-02 16:04:15.383813<---
+	[+] Arttibute		: meanCPUUsage
+	[+] Test size		: 835
+	[+] Training size	: 3339
+	[+] Window size		: 1
+	[+] Rule number		: 2
+	[+] Epoch		: 50
+	[+] RMSE		: 0.5889655334659804
+
+---> 2018-06-02 16:05:32.974647<---
+	[+] Arttibute		: meanCPUUsage
+	[+] Test size		: 835
+	[+] Training size	: 3339
+	[+] Window size		: 1
+	[+] Rule number		: 2
+	[+] Epoch		: 50
+	[+] RMSE		: 0.5894562427865998
+
+---> 2018-06-02 16:08:02.896185<---
+	[+] Arttibute		: meanCPUUsage
+	[+] Test size		: 831
+	[+] Training size	: 3324
+	[+] Window size		: 20
+	[+] Rule number		: 2
+	[+] Epoch		: 50
+	[+] RMSE		: 0.549289999902925
+
+---> 2018-06-16 2:33:34.058882<---
+	[+] Arttibute		: meanCPUUsage
+	[+] Test size		: 831
+	[+] Training size	: 3324
+	[+] Window size		: 20
+	[+] Rule number		: 5
+	[+] Epoch		    : 100
+	[+] RMSE		    : 0.2172474890953701
+
+---> 2018-06-16 3:50:29.577849<---
+	[+] Arttibute		: meanCPUUsage
+	[+] Test size		: 831
+	[+] Training size	: 3324
+	[+] Window size		: 20
+	[+] Rule number		: 5
+	[+] Epoch		    : 100
+	[+] RMSE		    : 0.2178932148954885
+
+---> 2018-06-16 12:32:13.398399<---
+	[+] Arttibute		: meanCPUUsage
+	[+] Test size		: 835
+	[+] Training size	: 3338
+	[+] Window size		: 20
+	[+] Rule number		: 5
+	[+] Epoch		    : 20
+	[+] RMSE		    : 0.4307612711376168
+
