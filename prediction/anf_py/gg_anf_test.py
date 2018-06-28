@@ -57,13 +57,13 @@ def main():
     train_size = int(data.shape[0]*TRAIN_PERCENTAGE)
     test_size = data.shape[0] - train_size
 
+    y_test = data[train_size:, -1]
     # Training data
     x = data[:train_size, :-1]
     y = data[:train_size, -1]
 
     # Test data
     x_test = data[train_size:, :-1]
-    y_test = data[train_size:, -1]
 
     # Dua du lieu vao ben trong va train
     mean1, mean2, sigma1, sigma2 = 25.0, 40.0, 15.0, 20.0

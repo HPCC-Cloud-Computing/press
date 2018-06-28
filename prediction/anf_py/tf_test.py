@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 from __future__ import division, print_function, absolute_import
-from skfuzzy import gaussmf
+# from skfuzzy import gaussmf
 import tensorflow as tf
 import numpy as np
 # Just disables the warning, doesn't enable AVX/FMA
@@ -35,5 +35,5 @@ def train():
 def summary():
     pass
 
+
 print(anfis_model(np.asarray([0.5, 2])))
-tf.distributions
