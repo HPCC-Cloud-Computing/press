@@ -114,7 +114,7 @@ def main():
         y_test = tf.reshape(y_test, [test_size, 1, 1])
         y_train = tf.reshape(y_train, [train_size, 1, 1])
         loss = tf.losses.mean_squared_error(y_train_predict, y_train)
-        # accuracy = tf.sqrt(tf.losses.mean_squared_error(y_test_predict, y_test))
+        accuracy = tf.sqrt(tf.losses.mean_squared_error(y_test_predict, y_test))
 
     with tf.name_scope('train'):
         train_step = tf.train.AdamOptimizer(1e-3).minimize(loss=loss)
@@ -125,8 +125,8 @@ def main():
         for i in range(1000):
             train_step.run(feed_dict={x: x_data})
             point = sess.run(loss, feed_dict={x: x_data})
-            print("Loop", i, " .Loss: ",point)
-        # print(sess.run(accuracy, feed_dict={x: x_data}))
+            print("Loop", i, " .Loss: ", point)
+        print(sess.run(accuracy, feed_dict={x: x_data}))
         # act = sess.run(y_test_predict, feed_dict={x: x_data})[:, 0, 0]
         # y_test = sess.run(y_test)[:, 0, 0]
         # x_axis = np.arange(0, test_size, 1)
