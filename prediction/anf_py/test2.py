@@ -2,18 +2,18 @@ import tensorflow as tf
 import os
 import numpy as np
 import pandas as pd
-import matplotlib.pyplot as plt
+# import matplotlib.pyplot as plt
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'
 
 # Khai bao hang so
-WINDOW_SIZE = 20
-RULE_NUMBER = 2
+WINDOW_SIZE = 5
+RULE_NUMBER = 30
 ATTRIBUTE = 'meanCPUUsage'
 p_para_shape = [WINDOW_SIZE, RULE_NUMBER]
 TRAIN_PERCENTAGE = 1.0
 
 fname = "google_trace_timeseries/data_resource_usage_10Minutes_6176858948.csv"
-# Cac Header trong file 
+# Cac Header trong file
 header = ["time_stamp", "numberOfTaskIndex", "numberOfMachineId",
           "meanCPUUsage", "canonical memory usage", "AssignMem",
           "unmapped_cache_usage", "page_cache_usage", "max_mem_usage",
@@ -114,26 +114,26 @@ def main():
         y_test = tf.reshape(y_test, [test_size, 1, 1])
         y_train = tf.reshape(y_train, [train_size, 1, 1])
         loss = tf.losses.mean_squared_error(y_train_predict, y_train)
-        accuracy = tf.sqrt(tf.losses.mean_squared_error(y_test_predict, y_test))
+        # accuracy = tf.sqrt(tf.losses.mean_squared_error(y_test_predict, y_test))
 
     with tf.name_scope('train'):
-        train_step = tf.train.AdamOptimizer(1e-3).minimize(loss=loss)
+        train_step = tf.train.AdamOptimizer(1e-2).minimize(loss=loss)
 
     with tf.Session() as sess:
         sess.run(tf.global_variables_initializer())
         x_data = np.reshape(x_data, [data_size, 1, WINDOW_SIZE]).astype(np.float32)
-        for i in range(1e5):
+        for i in range(5000):
             train_step.run(feed_dict={x: x_data})
             point = sess.run(loss, feed_dict={x: x_data})
             print("Loop", i, " .Loss: ",point)
-        act = sess.run(y_train_predict, feed_dict={x: x_data})[:, 0, 0]
-        y_test = sess.run(y_train)[:, 0, 0]
-        x_axis = np.arange(0, train_size, 1)
-        plt.title('Google cluter timeseries: ' + str(ATTRIBUTE))
-        plt.plot(x_axis, act, label='predict')
-        plt.plot(x_axis, y_test, label='actual')
-        plt.legend()
-        plt.show()
+        # act = sess.run(y_train_predict, feed_dict={x: x_data})[:, 0, 0]
+        # y_test = sess.run(y_train)[:, 0, 0]
+        # x_axis = np.arange(0, train_size, 1)
+        # plt.title('Google cluter timeseries: ' + str(ATTRIBUTE))
+        # plt.plot(x_axis, act, label='predict')
+        # plt.plot(x_axis, y_test, label='actual')
+        # plt.legend()
+        # plt.show()
 
 
 if __name__ == '__main__':
