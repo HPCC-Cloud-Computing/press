@@ -6,11 +6,11 @@ import matplotlib.pyplot as plt
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'
 
 # Khai bao hang so
-WINDOW_SIZE = 15
-RULE_NUMBER = 5
+WINDOW_SIZE = 20
+RULE_NUMBER = 2
 ATTRIBUTE = 'meanCPUUsage'
 p_para_shape = [WINDOW_SIZE, RULE_NUMBER]
-TRAIN_PERCENTAGE = 0.8
+TRAIN_PERCENTAGE = 1.0
 
 fname = "google_trace_timeseries/data_resource_usage_10Minutes_6176858948.csv"
 # Cac Header trong file 
@@ -93,7 +93,7 @@ class ANFIS:
 def main():
     # data
     model = ANFIS()
-    data = np.asarray(gen_to_data(df, WINDOW_SIZE, 'meanCPUUsage'))
+    data = np.asarray(gen_to_data(df, WINDOW_SIZE, 'meanCPUUsage'))[:100]
     train_size = int(data.shape[0]*TRAIN_PERCENTAGE)
     data_size = data.shape[0]
     test_size = data.shape[0] - train_size
@@ -117,15 +117,15 @@ def main():
         accuracy = tf.sqrt(tf.losses.mean_squared_error(y_test_predict, y_test))
 
     with tf.name_scope('train'):
-        train_step = tf.train.AdamOptimizer(0.01).minimize(loss=loss)
+        train_step = tf.train.AdamOptimizer(1e-3).minimize(loss=loss)
 
     with tf.Session() as sess:
         sess.run(tf.global_variables_initializer())
         x_data = np.reshape(x_data, [data_size, 1, WINDOW_SIZE]).astype(np.float32)
-        for i in range(10000):
+        for i in range(1e5):
             train_step.run(feed_dict={x: x_data})
             point = sess.run(loss, feed_dict={x: x_data})
-            print(point)
+            print("Loop", i, " .Loss: ",point)
         act = sess.run(y_train_predict, feed_dict={x: x_data})[:, 0, 0]
         y_test = sess.run(y_train)[:, 0, 0]
         x_axis = np.arange(0, train_size, 1)
