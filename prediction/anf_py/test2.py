@@ -7,10 +7,10 @@ os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'
 
 # Khai bao hang so
 WINDOW_SIZE = 5
-RULE_NUMBER = 30
+RULE_NUMBER = 2
 ATTRIBUTE = 'meanCPUUsage'
 p_para_shape = [WINDOW_SIZE, RULE_NUMBER]
-TRAIN_PERCENTAGE = 1.0
+TRAIN_PERCENTAGE = 0.8
 
 fname = "google_trace_timeseries/data_resource_usage_10Minutes_6176858948.csv"
 # Cac Header trong file
@@ -117,18 +117,19 @@ def main():
         # accuracy = tf.sqrt(tf.losses.mean_squared_error(y_test_predict, y_test))
 
     with tf.name_scope('train'):
-        train_step = tf.train.AdamOptimizer(1e-2).minimize(loss=loss)
+        train_step = tf.train.AdamOptimizer(1e-3).minimize(loss=loss)
 
     with tf.Session() as sess:
         sess.run(tf.global_variables_initializer())
         x_data = np.reshape(x_data, [data_size, 1, WINDOW_SIZE]).astype(np.float32)
-        for i in range(5000):
+        for i in range(1000):
             train_step.run(feed_dict={x: x_data})
             point = sess.run(loss, feed_dict={x: x_data})
             print("Loop", i, " .Loss: ",point)
-        # act = sess.run(y_train_predict, feed_dict={x: x_data})[:, 0, 0]
-        # y_test = sess.run(y_train)[:, 0, 0]
-        # x_axis = np.arange(0, train_size, 1)
+        # print(sess.run(accuracy, feed_dict={x: x_data}))
+        # act = sess.run(y_test_predict, feed_dict={x: x_data})[:, 0, 0]
+        # y_test = sess.run(y_test)[:, 0, 0]
+        # x_axis = np.arange(0, test_size, 1)
         # plt.title('Google cluter timeseries: ' + str(ATTRIBUTE))
         # plt.plot(x_axis, act, label='predict')
         # plt.plot(x_axis, y_test, label='actual')
