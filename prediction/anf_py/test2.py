@@ -34,8 +34,8 @@ premise_parameters = {
 # Initialize variables as Premise Parameter
 def premise_parameter(para_shape):
     para_init = {
-                'mu': tf.Variable(tf.random_uniform(para_shape, minval=2.0, maxval=2.5)),
-                'sigma': tf.Variable(tf.random_uniform(para_shape, minval=1.5, maxval=2.0))
+                'mu': tf.Variable(tf.random_uniform(para_shape, minval=20.0, maxval=30.0)),
+                'sigma': tf.Variable(tf.random_uniform(para_shape, minval=15.0, maxval=20.0))
                 }
     return para_init
 
@@ -93,7 +93,7 @@ class ANFIS:
 def main():
     # data
     model = ANFIS()
-    data = np.asarray(gen_to_data(df, WINDOW_SIZE, 'meanCPUUsage'))[:100]
+    data = np.asarray(gen_to_data(df, WINDOW_SIZE, 'meanCPUUsage'))
     train_size = int(data.shape[0]*TRAIN_PERCENTAGE)
     data_size = data.shape[0]
     test_size = data.shape[0] - train_size
@@ -104,6 +104,9 @@ def main():
     # Test data
     x_data = data[:, :-1]
     y_test = data[train_size:, -1]
+
+    # Save model
+    saver = tf.train.Saver()
 
     # Tao dau vao dau ra cua network
     with tf.name_scope('loss'):
@@ -122,11 +125,13 @@ def main():
     with tf.Session() as sess:
         sess.run(tf.global_variables_initializer())
         x_data = np.reshape(x_data, [data_size, 1, WINDOW_SIZE]).astype(np.float32)
-        for i in range(1000):
+        for i in range(100000):
             train_step.run(feed_dict={x: x_data})
             point = sess.run(loss, feed_dict={x: x_data})
             print("Loop", i, " .Loss: ", point)
         print(sess.run(accuracy, feed_dict={x: x_data}))
+        save_path = saver.save(sess, "/tmp/model.ckpt")
+        print("Model saved in path: %s" % save_path)
         # act = sess.run(y_test_predict, feed_dict={x: x_data})[:, 0, 0]
         # y_test = sess.run(y_test)[:, 0, 0]
         # x_axis = np.arange(0, test_size, 1)
