@@ -7,7 +7,7 @@ os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'
 
 # Khai bao hang so
 WINDOW_SIZE = 5
-RULE_NUMBER = 10
+RULE_NUMBER = 20
 ATTRIBUTE = 'meanCPUUsage'
 p_para_shape = [WINDOW_SIZE, RULE_NUMBER]
 TRAIN_PERCENTAGE = 0.8
