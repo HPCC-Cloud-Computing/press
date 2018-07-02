@@ -106,7 +106,7 @@ class ANFIS:
             test = net.run(acc, feed_dict={x: x_test, y: y_test})
             if(test < min_acc):
                 min_acc = test
-            print('Epoch: ', e, '\t.Test: ', test, '\t.Min', min)
+            print('Epoch: ', e, '\t.Test: ', test, '\t.Min', min_acc)
         net.close()
 
     def summary(self):
