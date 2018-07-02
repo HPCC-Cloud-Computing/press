@@ -2,12 +2,13 @@ import tensorflow as tf
 import os
 import numpy as np
 import pandas as pd
+import time
 # import matplotlib.pyplot as plt
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'
 
 # Khai bao hang so
-WINDOW_SIZE = 20
-RULE_NUMBER = 5
+WINDOW_SIZE = 5
+RULE_NUMBER = 20
 ATTRIBUTE = 'meanCPUUsage'
 p_para_shape = [WINDOW_SIZE, RULE_NUMBER]
 TRAIN_PERCENTAGE = 0.8
@@ -93,7 +94,7 @@ class ANFIS:
 def main():
     # data
     model = ANFIS()
-    data = np.asarray(gen_to_data(df, WINDOW_SIZE, 'meanCPUUsage'))
+    data = np.asarray(gen_to_data(df, WINDOW_SIZE, 'meanCPUUsage'))[:100]
     train_size = int(data.shape[0]*TRAIN_PERCENTAGE)
     data_size = data.shape[0]
     test_size = data.shape[0] - train_size
@@ -109,6 +110,7 @@ def main():
     saver = tf.train.Saver()
 
     # Tao dau vao dau ra cua network
+    z = time.time()
     with tf.name_scope('loss'):
         x = tf.placeholder(tf.float32, [data_size, 1, WINDOW_SIZE])
         y_data_predict = tf.convert_to_tensor([model.predict(x[i]) for i in np.arange(data_size)])
@@ -118,9 +120,12 @@ def main():
         y_train = tf.reshape(y_train, [train_size, 1, 1])
         loss = tf.losses.mean_squared_error(y_train_predict, y_train)
         accuracy = tf.sqrt(tf.losses.mean_squared_error(y_test_predict, y_test))
+        print(time.time() - z)
 
     with tf.name_scope('train'): # Phan nay ton nhieu chi phi khoi tao
-        train_step = tf.train.AdamOptimizer(1e-2).minimize(loss=loss)
+        z = time.time()
+        train_step = tf.train.AdamOptimizer(1e-3).minimize(loss=loss)
+        print(time.time() - z)
 
     with tf.Session() as sess:
         sess.run(tf.global_variables_initializer())
