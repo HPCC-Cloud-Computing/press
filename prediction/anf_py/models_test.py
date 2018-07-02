@@ -55,6 +55,6 @@ x_test = np.asarray(data[train_size:, :-1])
 y_test = np.asarray(data[train_size:, -1])
 x_test = np.reshape(x_test, [x_test.shape[0], 1, x_test.shape[1]])
 y_test = np.reshape(y_test, [y_test.shape[0], 1])
-anf_model.train(x_train=x_train, y_train=y_train, x_test=x_test, y_test=y_test, batch_size=100, epoch=5000)
+anf_model.train(x_train=x_train, y_train=y_train, x_test=x_test, y_test=y_test, batch_size=200, epoch=5000)
 
 
