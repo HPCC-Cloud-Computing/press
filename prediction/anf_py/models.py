@@ -81,10 +81,10 @@ class ANFIS:
         cost = tf.reduce_mean(tf.squared_difference(self.predict(x, batch_size), y))
 
         # Optimizer
-        optimizer = tf.train.AdamOptimizer(1e-3).minimize(cost)
+        optimizer = tf.train.AdamOptimizer(1e-4).minimize(cost)
         # Test loss
         acc = tf.sqrt(tf.reduce_mean(tf.squared_difference(self.predict(x, x_test.shape[0]), y)))
-
+        min_acc = 999.00
         # Init session
         net.run(tf.global_variables_initializer())
         # Start training
@@ -103,11 +103,10 @@ class ANFIS:
 
                 # Optimizing
                 net.run(optimizer, feed_dict={x: batch_x, y: batch_y})
-
-                loss = net.run(cost, feed_dict={x: batch_x, y: batch_y})
-                print("loss: ", loss)
-        test = net.run(acc, feed_dict={x: x_test, y: y_test})
-        print('Test: ', test)
+            test = net.run(acc, feed_dict={x: x_test, y: y_test})
+            if(test < min_acc):
+                min_acc = test
+            print('Epoch: ', e, '\t.Test: ', test, '\t.Min', min)
         net.close()
 
     def summary(self):

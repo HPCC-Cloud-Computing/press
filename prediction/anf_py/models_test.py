@@ -2,8 +2,8 @@
 import numpy as np
 import models
 import pandas as pd
-WINDOW_SIZE = 5
-RULE_NUMBER = 20
+WINDOW_SIZE = 20
+RULE_NUMBER = 50
 ATTRIBUTE = 'meanCPUUsage'
 p_para_shape = [WINDOW_SIZE, RULE_NUMBER]
 TRAIN_PERCENTAGE = 0.8
@@ -34,7 +34,7 @@ def gen_to_data(ss, window_size, attribute):
         temp_data.append(temp)
     return temp_data
 
-anf_model = models.ANFIS(window_size=WINDOW_SIZE, rule_number=10)
+anf_model = models.ANFIS(window_size=WINDOW_SIZE, rule_number=RULE_NUMBER)
 # x = np.asarray([[[1, 1]], [[4, 3]]], dtype=np.float32)
 # y = np.asarray([[[1]], [[2]]])
 # anf_model.train(x_train=x, y_train=y, epoch=10000)
@@ -55,6 +55,6 @@ x_test = np.asarray(data[train_size:, :-1])
 y_test = np.asarray(data[train_size:, -1])
 x_test = np.reshape(x_test, [x_test.shape[0], 1, x_test.shape[1]])
 y_test = np.reshape(y_test, [y_test.shape[0], 1])
-anf_model.train(x_train=x_train, y_train=y_train, x_test=x_test, y_test=y_test, batch_size=200, epoch=100000)
+anf_model.train(x_train=x_train, y_train=y_train, x_test=x_test, y_test=y_test, batch_size=100, epoch=50000)
 
 
