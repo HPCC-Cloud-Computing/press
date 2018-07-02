@@ -93,7 +93,7 @@ class ANFIS:
 def main():
     # data
     model = ANFIS()
-    data = np.asarray(gen_to_data(df, WINDOW_SIZE, 'meanCPUUsage'))[:100]
+    data = np.asarray(gen_to_data(df, WINDOW_SIZE, 'meanCPUUsage'))
     train_size = int(data.shape[0]*TRAIN_PERCENTAGE)
     data_size = data.shape[0]
     test_size = data.shape[0] - train_size
@@ -120,7 +120,7 @@ def main():
         accuracy = tf.sqrt(tf.losses.mean_squared_error(y_test_predict, y_test))
 
     with tf.name_scope('train'): # Phan nay ton nhieu chi phi khoi tao
-        train_step = tf.train.AdamOptimizer(1e-3).minimize(loss=loss)
+        train_step = tf.train.AdamOptimizer(1e-2).minimize(loss=loss)
 
     with tf.Session() as sess:
         sess.run(tf.global_variables_initializer())
