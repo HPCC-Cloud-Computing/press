@@ -3,7 +3,7 @@ import numpy as np
 import models
 import pandas as pd
 WINDOW_SIZE = 20
-RULE_NUMBER = 50
+RULE_NUMBER = 100
 ATTRIBUTE = 'meanCPUUsage'
 p_para_shape = [WINDOW_SIZE, RULE_NUMBER]
 TRAIN_PERCENTAGE = 0.8
