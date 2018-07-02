@@ -70,7 +70,7 @@ class ANFIS:
 
         return output
 
-    def train(self, x_train, y_train, x_test, y_test, batch_size, epoch):
+    def train(self, x_train, y_train, x_test, y_test, batch_size, epoch, rate):
         # Session
         net = tf.InteractiveSession()
         # Placeholder
@@ -81,7 +81,7 @@ class ANFIS:
         cost = tf.reduce_mean(tf.squared_difference(self.predict(x, batch_size), y))
 
         # Optimizer
-        optimizer = tf.train.AdamOptimizer(1e-4).minimize(cost)
+        optimizer = tf.train.AdamOptimizer(rate).minimize(cost)
         # Test loss
         acc = tf.sqrt(tf.reduce_mean(tf.squared_difference(self.predict(x, x_test.shape[0]), y)))
         min_acc = 999.00
