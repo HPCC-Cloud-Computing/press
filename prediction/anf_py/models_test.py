@@ -1,12 +1,16 @@
-
 import numpy as np
 import models
 import pandas as pd
+
+# Network features
 WINDOW_SIZE = 5
 RULE_NUMBER = 50
 ATTRIBUTE = 'meanCPUUsage'
 p_para_shape = [WINDOW_SIZE, RULE_NUMBER]
 TRAIN_PERCENTAGE = 0.8
+BATCH_SIZE = 50
+EPOCH = 100
+LEARNING_RATE = 1e-4
 
 fname = "google_trace_timeseries/data_resource_usage_10Minutes_6176858948.csv"
 # Cac Header trong file
@@ -17,10 +21,6 @@ header = ["time_stamp", "numberOfTaskIndex", "numberOfMachineId",
           "max_disk_io_time", "cpi", "mai",
           "sampling_portion", "agg_type", "sampled_cpu_usage"]
 
-# Lay du lieu tu file csv
-df = pd.read_csv(fname, names=header)
-mean_cpu_usage = df[ATTRIBUTE]
-#
 
 # Ham generate du lieu tu file ra data ma ANFIS co the train duoc
 def gen_to_data(ss, window_size, attribute):
@@ -34,27 +34,39 @@ def gen_to_data(ss, window_size, attribute):
         temp_data.append(temp)
     return temp_data
 
-anf_model = models.ANFIS(window_size=WINDOW_SIZE, rule_number=RULE_NUMBER)
-# x = np.asarray([[[1, 1]], [[4, 3]]], dtype=np.float32)
-# y = np.asarray([[[1]], [[2]]])
-# anf_model.train(x_train=x, y_train=y, epoch=10000)
 
-# Data
-data = np.asarray(gen_to_data(df, WINDOW_SIZE, 'meanCPUUsage'))
-train_size = int(data.shape[0]*TRAIN_PERCENTAGE)
-data_size = data.shape[0]
-# test_size = data.shape[0] - train_size
+def extract_data(raw_data, window_size, attribute):
+    """
 
-# Training data
-y_train = np.asarray(data[:train_size, -1])
-y_train = np.reshape(y_train, [y_train.shape[0], 1])
-# Test data
-x_train = np.asarray(data[:train_size, :-1])
-x_train = np.reshape(x_train, [x_train.shape[0], 1, x_train.shape[1]])
-x_test = np.asarray(data[train_size:, :-1])
-y_test = np.asarray(data[train_size:, -1])
-x_test = np.reshape(x_test, [x_test.shape[0], 1, x_test.shape[1]])
-y_test = np.reshape(y_test, [y_test.shape[0], 1])
-anf_model.train(x_train=x_train, y_train=y_train, x_test=x_test, y_test=y_test, batch_size=300, epoch=500, rate=5e-5)
+    :rtype: object
+    """
+    # data
+    data = np.asarray(gen_to_data(raw_data, window_size, attribute))
+    train_size = int(data.shape[0] * TRAIN_PERCENTAGE)
+
+    # Training data
+    tmp_x_train = np.asarray(data[:train_size, :-1])
+    x_train_ = np.reshape(tmp_x_train, [tmp_x_train.shape[0], 1, tmp_x_train.shape[1]])
+
+    tmp_y_train = np.asarray(data[:train_size, -1])
+    y_train_ = np.reshape(tmp_y_train, [tmp_y_train.shape[0], 1])
+
+    # Test data
+    tmp_x_test =np.asarray(data[train_size:, :-1])
+    tmp_y_test = np.asarray(data[train_size:, -1])
+
+    x_test_ = np.reshape(tmp_x_test, [tmp_x_test.shape[0], 1, tmp_x_test.shape[1]])
+    y_test_ = np.reshape(tmp_y_test, [tmp_y_test.shape[0], 1])
+    return x_train_, y_train_, x_test_, y_test_
 
 
+def main():
+    df = pd.read_csv(fname, names=header)
+    anf_model = models.ANFIS(window_size=WINDOW_SIZE, rule_number=RULE_NUMBER)
+    x_train, y_train, x_test, y_test = extract_data(df, window_size=WINDOW_SIZE, attribute=ATTRIBUTE)
+    anf_model.train(x_train=x_train, y_train=y_train, x_test=x_test, y_test=y_test,
+                    batch_size=BATCH_SIZE, epoch=EPOCH, rate=LEARNING_RATE)
+
+
+if __name__ == '__main__':
+    main()

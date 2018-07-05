@@ -2,10 +2,19 @@ import tensorflow as tf
 import numpy as np
 
 
-def premise_parameter(para_shape):
+def premise_parameter(para_shape, min_mu=20.0, max_mu=30.0, min_sigma=15.0, max_sigma=20.0):
+    """
+
+    :param para_shape:
+    :param min_mu:
+    :param max_mu:
+    :param min_sigma:
+    :param max_sigma:
+    :return:
+    """
     para_init = {
-        'mu': tf.Variable(tf.random_uniform(para_shape, minval=20.0, maxval=30.0)),
-        'sigma': tf.Variable(tf.random_uniform(para_shape, minval=15.0, maxval=20.0))
+        'mu': tf.Variable(tf.random_uniform(para_shape, minval=min_mu, maxval=max_mu)),
+        'sigma': tf.Variable(tf.random_uniform(para_shape, minval=min_sigma, maxval=max_sigma))
     }
     return para_init
 
@@ -34,6 +43,7 @@ class ANFIS:
     def predict(self, x, input_size):
         """
 
+        :param input_size:
         :param x:
         :return:
         """
@@ -49,14 +59,11 @@ class ANFIS:
             fuzzy_rules = tf.reduce_prod(fuzzy_sets, axis=2)
 
         with tf.name_scope('layer_3'):  # Normalization Layer
-            # normalized_fuzzy_rules = tf.reshape(fuzzy_rules / tf.reduce_sum(fuzzy_rules, axis=1), [1, self.rule_number])
-            # normalized_fuzzy_rules = [tf.divide(fuzzy_rules[i], tf.reduce_sum(fuzzy_rules, axis=1)[i])
-            #                           for i in np.arange(self.rule_number)]
             sum_fuzzy_rules = tf.expand_dims(tf.reduce_sum(fuzzy_rules, axis=1), axis=1)
             normalized_fuzzy_rules = tf.expand_dims(tf.divide(fuzzy_rules[0], sum_fuzzy_rules[0]), axis=0)
             for i in np.arange(1, input_size):
-                 tmp_norm_rules = tf.expand_dims(tf.divide(fuzzy_rules[i], sum_fuzzy_rules[i]), axis=0)
-                 normalized_fuzzy_rules = tf.concat([normalized_fuzzy_rules, tmp_norm_rules], 0)
+                tmp_norm_rules = tf.expand_dims(tf.divide(fuzzy_rules[i], sum_fuzzy_rules[i]), axis=0)
+                normalized_fuzzy_rules = tf.concat([normalized_fuzzy_rules, tmp_norm_rules], 0)
             normalized_fuzzy_rules = tf.expand_dims(normalized_fuzzy_rules, axis=1)
 
         with tf.name_scope('layer_4_5'):  # Defuzzification Layer and Output Layer
@@ -71,6 +78,10 @@ class ANFIS:
         return output
 
     def train(self, x_train, y_train, x_test, y_test, batch_size, epoch, rate):
+        """
+
+        :rtype: object
+        """
         # Session
         net = tf.InteractiveSession()
         # Placeholder
@@ -80,11 +91,13 @@ class ANFIS:
         # Cost function
         cost = tf.reduce_mean(tf.squared_difference(self.predict(x, batch_size), y))
 
+        # Entire train loss function
+        # lost = tf.reduce_mean(tf.squared_difference(self.predict(x, x_train.shape[0]), y))
+
         # Optimizer
         optimizer = tf.train.AdamOptimizer(rate).minimize(cost)
         # Test loss
         acc = tf.sqrt(tf.reduce_mean(tf.squared_difference(self.predict(x, x_test.shape[0]), y)))
-        min_acc = 999.00
         # Init session
         net.run(tf.global_variables_initializer())
         # Start training
@@ -103,10 +116,10 @@ class ANFIS:
 
                 # Optimizing
                 net.run(optimizer, feed_dict={x: batch_x, y: batch_y})
-            test = net.run(acc, feed_dict={x: x_test, y: y_test})
-            if(test < min_acc):
-                min_acc = test
-            print('Epoch: ', e, '\t.Test: ', test, '\t.Min', min_acc)
+            # t = net.run(lost, feed_dict={x: x_train, y: y_train})
+            print(e)
+        test = net.run(acc, feed_dict={x: x_test, y: y_test})
+        print('\t.Test: ', test)
         net.close()
 
     def summary(self):
