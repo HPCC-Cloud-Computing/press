@@ -2,7 +2,7 @@ import tensorflow as tf
 import numpy as np
 
 
-def premise_parameter(para_shape, min_mu=20.0, max_mu=30.0, min_sigma=15.0, max_sigma=20.0):
+def premise_parameter(para_shape, min_mu=10.0, max_mu=15.0, min_sigma=5.0, max_sigma=10.0):
     """
 
     :param para_shape:
@@ -74,7 +74,6 @@ class ANFIS:
                     tf.transpose(tf.add(tf.matmul(x[i], self.weights), self.bias)), axis=0), [0])
                 tmp_output = tf.matmul(normalized_fuzzy_rules[i], tmp_f)
                 output = tf.concat([output, tmp_output], 0)
-
         return output
 
     def train(self, x_train, y_train, x_test, y_test, batch_size, epoch, rate):
@@ -93,6 +92,7 @@ class ANFIS:
 
         # Entire train loss function
         # lost = tf.reduce_mean(tf.squared_difference(self.predict(x, x_train.shape[0]), y))
+        # lost_list = []
 
         # Optimizer
         optimizer = tf.train.AdamOptimizer(rate).minimize(cost)
@@ -102,7 +102,6 @@ class ANFIS:
         net.run(tf.global_variables_initializer())
         # Start training
         for e in range(epoch):
-
             # Shuffle training data
             shuffle = np.random.permutation(np.arange(len(y_train)))
             x_train = x_train[shuffle]
@@ -116,11 +115,13 @@ class ANFIS:
 
                 # Optimizing
                 net.run(optimizer, feed_dict={x: batch_x, y: batch_y})
-            # t = net.run(lost, feed_dict={x: x_train, y: y_train})
-            print(e)
-        test = net.run(acc, feed_dict={x: x_test, y: y_test})
-        print('\t.Test: ', test)
+            # lost_value = net.run(lost, feed_dict={x: x_train, y: y_train})
+            test = net.run(acc, feed_dict={x: x_test, y: y_test})
+            print(e, 'Test: ', test)
+            # lost_list.append(lost_value)
         net.close()
+        # duration = time.time() - start_time
+        # print(duration)
 
     def summary(self):
         pass

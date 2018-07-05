@@ -4,12 +4,12 @@ import pandas as pd
 
 # Network features
 WINDOW_SIZE = 5
-RULE_NUMBER = 50
+RULE_NUMBER = 40
 ATTRIBUTE = 'meanCPUUsage'
 p_para_shape = [WINDOW_SIZE, RULE_NUMBER]
 TRAIN_PERCENTAGE = 0.8
-BATCH_SIZE = 50
-EPOCH = 100
+BATCH_SIZE = 10
+EPOCH = 2000
 LEARNING_RATE = 1e-4
 
 fname = "google_trace_timeseries/data_resource_usage_10Minutes_6176858948.csv"
@@ -30,7 +30,7 @@ def gen_to_data(ss, window_size, attribute):
     for i in np.arange(d.shape[0] - window_size):
         temp = []
         for j in np.arange(window_size):
-            temp.append(d[i+j])
+            temp.append(d[i + j])
         temp_data.append(temp)
     return temp_data
 
@@ -52,7 +52,7 @@ def extract_data(raw_data, window_size, attribute):
     y_train_ = np.reshape(tmp_y_train, [tmp_y_train.shape[0], 1])
 
     # Test data
-    tmp_x_test =np.asarray(data[train_size:, :-1])
+    tmp_x_test = np.asarray(data[train_size:, :-1])
     tmp_y_test = np.asarray(data[train_size:, -1])
 
     x_test_ = np.reshape(tmp_x_test, [tmp_x_test.shape[0], 1, tmp_x_test.shape[1]])
@@ -63,6 +63,7 @@ def extract_data(raw_data, window_size, attribute):
 def main():
     df = pd.read_csv(fname, names=header)
     anf_model = models.ANFIS(window_size=WINDOW_SIZE, rule_number=RULE_NUMBER)
+
     x_train, y_train, x_test, y_test = extract_data(df, window_size=WINDOW_SIZE, attribute=ATTRIBUTE)
     anf_model.train(x_train=x_train, y_train=y_train, x_test=x_test, y_test=y_test,
                     batch_size=BATCH_SIZE, epoch=EPOCH, rate=LEARNING_RATE)
