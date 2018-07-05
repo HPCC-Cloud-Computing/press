@@ -1,3 +1,5 @@
+numpy
+tensorflow
 # anfis
 scikit-fuzzy
 matplotlib

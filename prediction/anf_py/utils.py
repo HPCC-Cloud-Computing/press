@@ -2,7 +2,8 @@
 import numpy as np
 from skfuzzy import gaussmf, gbellmf, sigmf
 import random
-
+from sklearn.metrics import mean_squared_error as mse
+import matplotlib.pyplot as plt
 """
     Cac ham phu tro cua ANFIS duoc de tai day
     ...
@@ -38,7 +39,7 @@ def first_layer(x: np.ndarray, fp: np.ndarray):
 
 
 def loss_function(x, y):
-    return ((x - y)**2).mean(axis=0)
+    return mse(x, y)
 
 
 # Dau ra cua lop thu 2
@@ -67,3 +68,11 @@ def fouth_layer(otl: np.ndarray, x: np.ndarray, cp: np.ndarray):
 # Dau ra cuoi
 def fifth_layer(ofl: np.ndarray):
     return sum(ofl)
+
+def show_image(input_list: list):
+    plt.plot(np.arange(1, len(input_list) + 1), input_list)
+    plt.title('Training loss by epoch')
+    plt.ylabel('Train loss')
+    plt.xlabel('epoch')
+    plt.axis([0, (len(input_list) + 1), 0, (max(input_list) + 1)])
+    plt.show()

@@ -7,10 +7,10 @@ from utils import loss_function
 from datetime import datetime
 # Cac hang so
 TRAIN_PERCENTAGE = 0.8
-WINDOW_SIZE = 50
-RULE_NUMBER = 5
+WINDOW_SIZE = 2
+RULE_NUMBER = 2
 ATTRIBUTE = 'meanCPUUsage'
-EPOCH = 500
+EPOCH = 30
 # Khai bao file
 # Ten file
 fname = "google_trace_timeseries/data_resource_usage_10Minutes_6176858948.csv"
@@ -57,16 +57,16 @@ def main():
     train_size = int(data.shape[0]*TRAIN_PERCENTAGE)
     test_size = data.shape[0] - train_size
 
+    y_test = data[train_size:, -1]
     # Training data
     x = data[:train_size, :-1]
     y = data[:train_size, -1]
 
     # Test data
     x_test = data[train_size:, :-1]
-    y_test = data[train_size:, -1]
 
     # Dua du lieu vao ben trong va train
-    mean1, mean2, sigma1, sigma2 = 20.0, 25.0, 15.0, 20.0
+    mean1, mean2, sigma1, sigma2 = 25.0, 40.0, 15.0, 20.0
     a = anfis.ANFIS(x, y, 'gauss', RULE_NUMBER, epoch=EPOCH)
     a.fix_p_para(mean1, mean2, sigma1, sigma2)
     a.hybridTraining()
