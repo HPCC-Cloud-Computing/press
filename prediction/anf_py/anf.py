@@ -24,7 +24,7 @@ class ANFIS:
         except IndexError as err:
             print('Training input must be 3-d array: ', err)
             exit(0)
-        self.p_para = frame_parameter(self.mf, self.rule_number,
+        self.p_para = frame_parameter(self.rule_number,
                                       self.window_size)
         self.c_para = consequence_parameter(self.rule_number, self.window_size)
 
@@ -99,7 +99,7 @@ class ANFIS:
 
     # Dung de chinh sua tham so khoi tao tuy thuoc vao du lieu train
     def fix_p_para(self, mean1, mean2, sigma1, sigma2):
-        self.p_para = frame_parameter(self.mf, self.rule_number,
+        self.p_para = frame_parameter(self.rule_number,
                                       self.window_size, mean1,
                                       mean2, sigma1, sigma2)
 
