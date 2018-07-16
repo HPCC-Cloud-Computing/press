@@ -1,5 +1,6 @@
 import tensorflow as tf
 import numpy as np
+from sklearn.metrics import mean_absolute_error
 
 
 def premise_parameter(para_shape, min_mu=10.0, max_mu=15.0, min_sigma=5.0, max_sigma=10.0):
@@ -91,15 +92,23 @@ class ANFIS:
         cost = tf.reduce_mean(tf.squared_difference(self.predict(x, batch_size), y))
 
         # Entire train loss function
+        # Phan code nay dung de lay cac gia tri cua train loss, su dung de ve~ do thi hoi tu loss
         # lost = tf.reduce_mean(tf.squared_difference(self.predict(x, x_train.shape[0]), y))
         # lost_list = []
 
         # Optimizer
         optimizer = tf.train.AdamOptimizer(rate).minimize(cost)
+
         # Test loss
+        # acc la bien dua ra gia tri ve RMSE cua tap test so voi gia tri du doan duoc
         acc = tf.sqrt(tf.reduce_mean(tf.squared_difference(self.predict(x, x_test.shape[0]), y)))
+        # Su dung pred nay de dua ra duoc MAE vi MAE khong co san trong tensorflow
+        # Viec nay khong anh huong nhieu den code performance nen khong can dua het vao tensor cung duoc
+        pred = self.predict(x, x_test.shape[0])
+
         # Init session
         net.run(tf.global_variables_initializer())
+
         # Start training
         for e in range(epoch):
             # Shuffle training data
@@ -115,10 +124,15 @@ class ANFIS:
 
                 # Optimizing
                 net.run(optimizer, feed_dict={x: batch_x, y: batch_y})
+
+            # Chay cac gia tri ve loss de in ra hoac ve do thi
             # lost_value = net.run(lost, feed_dict={x: x_train, y: y_train})
-            test = net.run(acc, feed_dict={x: x_test, y: y_test})
-            print(e, 'Test: ', test)
+            test_rmse = net.run(acc, feed_dict={x: x_test, y: y_test})  # RMSE test
+            pred_value = net.run(pred, feed_dict={x: x_test})
+            test_mae = mean_absolute_error(pred_value, y_test)  # MAE test
+            print(e, 'Test-RMSE: ', test_rmse, 'MAE:', test_mae)
             # lost_list.append(lost_value)
+            # Neu muon lay ham ve do thi, co the goi ham show_image trong file utils.py
         net.close()
         # duration = time.time() - start_time
         # print(duration)
