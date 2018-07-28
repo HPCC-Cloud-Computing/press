@@ -10,7 +10,7 @@ ATTRIBUTE = 'meanCPUUsage'
 p_para_shape = [WINDOW_SIZE, RULE_NUMBER]
 TRAIN_PERCENTAGE = 0.8
 BATCH_SIZE = 10
-EPOCH = 2000
+EPOCH = 20
 LEARNING_RATE = 1e-4
 
 # Cac tham so lien quan den giai thuat SA

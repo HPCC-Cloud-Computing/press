@@ -3,6 +3,8 @@ import numpy as np
 from sklearn.metrics import mean_absolute_error
 from random import uniform as random
 from scipy.constants import Boltzmann
+
+
 def premise_parameter(para_shape, min_mu=10.0, max_mu=15.0, min_sigma=5.0, max_sigma=10.0):
     """
 
@@ -25,11 +27,13 @@ def consequence_parameter(para_shape):
     para_init = tf.random_normal(para_shape)
     return tf.Variable(para_init)
 
+
 # Lay mot lan can cua ma tran chua tham so
 def neighbor(x):
     delta = tf.random_normal(shape=x.get_shape(), mean=0.0, stddev=0.001*tf.reduce_mean(x))
     x = x + delta
     return x
+
 
 class ANFIS:
     def __init__(self, rule_number, window_size):
@@ -145,23 +149,26 @@ class ANFIS:
     def hybridSATraining(self, x_train, y_train, x_test, y_test, batch_size, epoch,
                          rate, temp_init, neighbor_number, reduce_factor):
         # Session
+        print("Initializing Session ...")
         net = tf.InteractiveSession()
+
         # Placeholder
-        x = tf.placeholder(dtype=tf.float32, shape=[None, 1, self.window_size])
+        print("Initializing Placeholder ...")
         y = tf.placeholder(dtype=tf.float32, shape=[None, 1])
+        x = tf.placeholder(dtype=tf.float32, shape=[None, 1, self.window_size])
 
         # Cost function
+        print("Initializing Loss Function and optimizer ...")
         cost = tf.reduce_mean(tf.squared_difference(self.predict(x, batch_size), y))
 
         # Entire train loss function
         # Phan code nay dung de lay cac gia tri cua train loss, su dung de ve~ do thi hoi tu loss
         # lost = tf.reduce_mean(tf.squared_difference(self.predict(x, x_train.shape[0]), y))
         # lost_list = []
-        f_tensor = tf.reduce_mean(tf.squared_difference(self.predict(x, x_train.shape[0]), y))
+        sa_loss = tf.reduce_mean(tf.squared_difference(self.predict(x, x_train.shape[0]), y))
 
         # Optimizer
         optimizer = tf.train.AdamOptimizer(rate).minimize(cost)
-
         # Test loss
         # acc la bien dua ra gia tri ve RMSE cua tap test so voi gia tri du doan duoc
         acc = tf.sqrt(tf.reduce_mean(tf.squared_difference(self.predict(x, x_test.shape[0]), y)))
@@ -190,19 +197,20 @@ class ANFIS:
             # SA training ngay sau do
             previous_parameters = self.w_fuzz, self.weights, self.bias
             temp = temp_init
-            f0 = net.run(f_tensor)
+            f0 = net.run(sa_loss, feed_dict={x: x_train, y: y_train})
             for n in range(neighbor_number):
-                sess.run(self.w_fuzz.assign(neighbor(self.w_fuzz)))
-                sess.run(self.weights.assign(neighbor(self.weights)))
-                sess.run(self.bias.assign(neighbor(self.bias)))
-                f = net.run(f_tensor)
+                net.run(self.w_fuzz['mu'].assign(neighbor(self.w_fuzz['mu'])))
+                net.run(self.w_fuzz['sigma'].assign(neighbor(self.w_fuzz['sigma'])))
+                net.run(self.weights.assign(neighbor(self.weights)))
+                net.run(self.bias.assign(neighbor(self.bias)))
+                f = net.run(sa_loss, feed_dict={x: x_train, y: y_train})
 
                 if (f < f0):
                     f_new = f
                 else:
                     df = f - f0
                     r = random(0, 1)
-                    if r > exp(-df/Boltzmann/temp):
+                    if r > np.exp(-df/Boltzmann/temp):
                         f_new = f
                     else:
                         f_new = f0
@@ -217,7 +225,6 @@ class ANFIS:
         net.close()
         # duration = time.time() - start_time
         # print(duration)
-
 
     def summary(self):
         pass
