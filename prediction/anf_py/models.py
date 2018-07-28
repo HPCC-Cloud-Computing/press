@@ -178,15 +178,17 @@ class ANFIS:
 
         # Init session
         net.run(tf.global_variables_initializer())
-
+        print("Start training ...")
         # Start training
         for e in range(epoch):
             # Shuffle training data
             shuffle = np.random.permutation(np.arange(len(y_train)))
             x_train = x_train[shuffle]
             y_train = y_train[shuffle]
+            print("Epoch: ", e)
 
             # Based-batch training
+            print("Gradient Descent ...")
             for i in np.arange(0, len(y_train) // batch_size):
                 start = i * batch_size
                 batch_x = x_train[start:start + batch_size]
@@ -198,6 +200,7 @@ class ANFIS:
             previous_parameters = self.w_fuzz, self.weights, self.bias
             temp = temp_init
             f0 = net.run(sa_loss, feed_dict={x: x_train, y: y_train})
+            print("Simulated Annealing ...")
             for n in range(neighbor_number):
                 net.run(self.w_fuzz['mu'].assign(neighbor(self.w_fuzz['mu'])))
                 net.run(self.w_fuzz['sigma'].assign(neighbor(self.w_fuzz['sigma'])))
@@ -207,11 +210,13 @@ class ANFIS:
 
                 if (f < f0):
                     f_new = f
+                    previous_parameters = self.w_fuzz, self.weights, self.bias
                 else:
                     df = f - f0
                     r = random(0, 1)
                     if r > np.exp(-df/Boltzmann/temp):
                         f_new = f
+                        previous_parameters = self.w_fuzz, self.weights, self.bias
                     else:
                         f_new = f0
                         self.w_fuzz, self.weights, self.bias = previous_parameters
