@@ -146,8 +146,8 @@ class ANFIS:
         # duration = time.time() - start_time
         # print(duration)
 
-    def hybridSATraining(self, x_train, y_train, x_test, y_test, batch_size, epoch,
-                         rate, temp_init, neighbor_number, reduce_factor):
+    def hybrid_sa_training(self, x_train, y_train, x_test, y_test, batch_size, epoch,
+                           rate, temp_init, neighbor_number, reduce_factor):
         # Session
         print("Initializing Session ...")
         net = tf.InteractiveSession()
@@ -207,8 +207,7 @@ class ANFIS:
                 net.run(self.weights.assign(neighbor(self.weights)))
                 net.run(self.bias.assign(neighbor(self.bias)))
                 f = net.run(sa_loss, feed_dict={x: x_train, y: y_train})
-
-                if (f < f0):
+                if f < f0:
                     f_new = f
                     previous_parameters = self.w_fuzz, self.weights, self.bias
                 else:
