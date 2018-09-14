@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-import models
+import old_models
 import pandas as pd
 from utils import extract_data
 
@@ -16,7 +16,7 @@ EPOCH = 30
 LEARNING_RATE = 1e-4
 
 # Cac tham so lien quan den giai thuat SA
-NEIGHBOR_NUMBER = 50
+NEIGHBOR_NUMBER = 10
 REDUCE_FACTOR = 0.95
 TEMPERATURE_INIT = 100
 
@@ -39,7 +39,7 @@ def main():
     x_train, y_train, x_test, y_test = extract_data(df, window_size=WINDOW_SIZE,
                                                     attribute=ATTRIBUTE, train_percentage=TRAIN_PERCENTAGE)
     # Khai bao ANFIS network
-    anf_model = models.ANFIS(window_size=WINDOW_SIZE, rule_number=RULE_NUMBER)
+    anf_model = old_models.ANFIS(window_size=WINDOW_SIZE, rule_number=RULE_NUMBER)
 
     # Bat dau huan luyen mang anfis
     anf_model.hybrid_sa_training(x_train=x_train, y_train=y_train, x_test=x_test, y_test=y_test,
