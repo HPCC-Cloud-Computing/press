@@ -15,7 +15,7 @@ WINDOW_SIZE = 20
 RULE_NUMBER = 5
 ATTRIBUTE = 'meanCPUUsage'
 TRAIN_PERCENTAGE = 0.8
-EPOCH = 1000
+EPOCH = 10
 LEARNING_RATE = 1e-2
 
 
@@ -28,7 +28,7 @@ def main():
                                                     train_percentage=TRAIN_PERCENTAGE)
     # Khai bao ANFIS network
     anfis_model = models.ANFIS(window_size=WINDOW_SIZE, rule_number=RULE_NUMBER)
-    save_path = f"results/originals/anfis_rule_number_{RULE_NUMBER}.cpkt"
+    save_path = f"./results/originals/anfis_rule_number_{RULE_NUMBER}.cpkt"
     anfis_model.train(x_train=x_train, y_train=y_train,
                       epoch=EPOCH, rate=LEARNING_RATE,
                       save_path=save_path)
