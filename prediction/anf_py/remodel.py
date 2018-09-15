@@ -4,7 +4,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 import tensorflow as tf
 
-plt.switch_backend('agg')
+# plt.switch_backend('agg')
 
 
 # Save figure for 1-dimension data
@@ -151,7 +151,7 @@ class ANFIS:
             # Check save_path
             if save_path is not None:
                 saver.save(sess, save_path)
-        
+        writer(track_list)
         # Saving figures
         fig_path = f"{save_path}_tracking.png"
         writer(f"Saving tracking figures to {fig_path} ")
