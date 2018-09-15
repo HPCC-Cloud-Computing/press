@@ -142,7 +142,6 @@ class ANFIS:
                 sess.run(optimizer, feed_dict={x: x_train, y: y_train})
                 c = sess.run(cost, feed_dict={x: x_train, y: y_train})
                 writer(f"{e}: {c}")
-                
                 # Appened new loss value to track_list
                 if tracking_loss:
                     track_list = np.append(track_list, c)
@@ -160,7 +159,7 @@ class ANFIS:
     
     # Compute loss from input data and compare output with labels
     def loss(self,
-             x, y,
+             x_test, y_test,
              load_path=None):
         """
 
@@ -169,18 +168,18 @@ class ANFIS:
         :param load_path: Load model from this path
         :return: loss function
         """
-        x_ = tf.placeholder(dtype=tf.float32, shape=[None, 1, self.window_size])
-        y_ = tf.placeholder(dtype=tf.float32, shape=[None, 1])
-        cost = tf.reduce_mean(tf.squared_difference(self.output(x_), y_))
+        x = tf.placeholder(dtype=tf.float32, shape=[None, 1, self.window_size])
+        y = tf.placeholder(dtype=tf.float32, shape=[None, 1])
+        cost = tf.reduce_mean(tf.squared_difference(self.output(x), y))
         
         saver = tf.train.Saver()
         
         with tf.Session() as sess:
             # Check Model path Loading
+            sess.run(tf.global_variables_initializer())
             if load_path is not None:
                 saver.restore(sess, load_path)
-            sess.run(tf.global_variables_initializer())
             # op = sess.run(self.output(x_), feed_dict={x_: x})
-            mse = sess.run(cost, feed_dict={x_: x, y_: y})
+            mse = sess.run(cost, feed_dict={x: x_test, y: y_test})
             writer(f"mse: {mse}")
         return mse

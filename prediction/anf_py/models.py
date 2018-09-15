@@ -191,10 +191,11 @@ class ANFIS:
             print("Initializing Placeholder ..")
             # tf.reset_default_graph()
             x_placeholder = tf.placeholder(dtype=tf.float32, shape=[None, 1, self.window_size])
+            y_placeholder = tf.placeholder(dtype=tf.float32, shape=[None, 1])
 
             loader = tf.train.Saver()
 
-            mse = tf.reduce_mean(tf.squared_difference(self.output(x_placeholder), y))
+            mse = tf.reduce_mean(tf.squared_difference(self.output(x_placeholder), y_placeholder))
 
             with tf.Session() as sess:
                 if load_path is not None:
@@ -203,7 +204,7 @@ class ANFIS:
                 # Restore model from path and computing result from input x_test
 
                 print("Computing result ...")
-                result = sess.run(mse, feed_dict={x_placeholder: x})
+                result = sess.run(mse, feed_dict={x_placeholder: x, y_placeholder: y})
                 print(result)
                 print("Done")
         return result

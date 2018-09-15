@@ -15,7 +15,7 @@ WINDOW_SIZE = 20
 RULE_NUMBER = 5
 ATTRIBUTE = 'meanCPUUsage'
 TRAIN_PERCENTAGE = 0.8
-EPOCH = 15000
+EPOCH = 1000
 LEARNING_RATE = 1e-2
 
 
@@ -32,8 +32,7 @@ def main():
     anfis_model.train(x_train=x_train, y_train=y_train,
                       epoch=EPOCH, rate=LEARNING_RATE,
                       save_path=save_path)
-    # new_anf_model.predict(x_test=x_train)
-    
+    anfis_model.loss(x_train, y_train, load_path=save_path)
     # new_anf_model.figure(x_test=x_test, y_test=y_test, load_path=save_path)
     # anfis_model.predict(input_data=x_test, load_path=save_path)
     # anfis_model.mse(x=x_test, y=y_test, load_path=save_path)
