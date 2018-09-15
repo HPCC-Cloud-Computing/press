@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 import numpy as np
 import pandas as pd
-import anf as anfis
+from archive import anf as anfis
 import matplotlib.pyplot as plt
 from utils import loss_function
 from datetime import datetime
