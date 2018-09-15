@@ -4,6 +4,8 @@ import matplotlib.pyplot as plt
 import numpy as np
 import tensorflow as tf
 
+plt.switch_backend('agg')
+
 
 # Save figure for 1-dimension data
 def save_figures(data, label,
