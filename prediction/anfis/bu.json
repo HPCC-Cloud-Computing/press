@@ -75,7 +75,7 @@
     "details": {
       "rule_number": 5,
       "learning_rate": 1e-2,
-      "epoch": 10,
+      "epoch": 1000,
       "neighbor_number": 5,
       "reduce_factor": 0.95,
       "temp_init": 100,

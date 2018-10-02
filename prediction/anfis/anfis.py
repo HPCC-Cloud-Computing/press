@@ -271,7 +271,6 @@ class ANFIS:
             for e in range(1, epoch + 1):
                 # GD phase for all parameters
                 sess.run(optimizer, feed_dict={x: x_train, y: y_train})
-                c = sess.run(cost, feed_dict={x: x_train, y: y_train})
                 point = sess.run(cost, feed_dict={x: x_test, y: y_test})
 
                 # SA phase for all parameters
@@ -302,12 +301,13 @@ class ANFIS:
 
                 # Appened new loss value to track_list
                 if tracking_loss:
-                    track_list = np.append(track_list, c)
+                    track_list = np.append(track_list, f0)
                 if point < minimun_mse:
                     minimun_mse = point
                     if save_path is not None:
                         saver.save(sess, save_path)
-                writer(f"{e}: {c}")
+                # writer(f"{e}: {c}")
+                writer(e)
 
             # Check save_path
             if save_path is not None:
