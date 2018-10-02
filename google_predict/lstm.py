@@ -8,7 +8,7 @@ from keras.layers import Dense, LSTM
 
 if __name__ == '__main__':
     # file contain data
-    filename = "data/google_trace_timeseries/google_trace_timeseries/data_resource_usage_10Minutes_6176858948.csv"
+    filename = "data/dataset/dataset/data_resource_usage_10Minutes_6176858948.csv"
 
     # load data set: "mean_cpu_usage", "canonical_memory_usage"
     header = ["time_stamp", "number_of_task_index", "number_of_machine_id",

@@ -1,0 +1,1 @@
+{"name": "Original ANFIS", "details": {"attribute": "meanCPUUsage", "rule_number": 30, "epoch": 1000, "learning_rate": 0.01}, "result": {"mse": 0.2686689794063568}}

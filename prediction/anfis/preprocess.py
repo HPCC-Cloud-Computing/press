@@ -1,7 +1,7 @@
 import numpy as np
 
 # Ten file duoc dua vao ANFIS network
-fname = "google_trace_timeseries/data_resource_usage_10Minutes_6176858948.csv"
+fname = "dataset/data_resource_usage_10Minutes_6176858948.csv"
 
 # Cac Header trong file
 header = ["time_stamp", "numberOfTaskIndex", "numberOfMachineId",
