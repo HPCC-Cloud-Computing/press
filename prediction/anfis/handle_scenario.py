@@ -48,23 +48,29 @@ def run_scenario(dataset_dicrectory,
                                         tracking_loss=True,
                                         tracking_path=tracking_path)
             if model_name == 'SA1 ANFIS':
+                neighbor_number = details.get('neighbor_number')
                 mse = anfis_model.sa1_train(x_train=x_train, y_train=y_train,
                                             x_test=x_test, y_test=y_test,
                                             epoch=epoch, rate=learning_rate,
+                                            neighbor_number=neighbor_number,
                                             save_path=save_path,
                                             tracking_loss=True,
                                             tracking_path=tracking_path)
             if model_name == 'SA2 ANFIS':
+                neighbor_number = details.get('neighbor_number')
                 mse = anfis_model.sa2_train(x_train=x_train, y_train=y_train,
                                             x_test=x_test, y_test=y_test,
                                             epoch=epoch, rate=learning_rate,
+                                            neighbor_number=neighbor_number,
                                             save_path=save_path,
                                             tracking_loss=True,
                                             tracking_path=tracking_path)
             if model_name == 'SA3 ANFIS':
+                neighbor_number = details.get('neighbor_number')
                 mse = anfis_model.sa3_train(x_train=x_train, y_train=y_train,
                                             x_test=x_test, y_test=y_test,
                                             epoch=epoch, rate=learning_rate,
+                                            neighbor_number=neighbor_number,
                                             save_path=save_path,
                                             tracking_loss=True,
                                             tracking_path=tracking_path)

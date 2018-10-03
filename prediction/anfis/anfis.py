@@ -297,6 +297,7 @@ class ANFIS:
                             f_new = f0
                             self.w_fuzz, self.weights, self.bias = previous_parameters
                     f0 = f_new
+                    writer(f"{e}, {n}")
                     temp = reduce_factor * temp
 
                 # Appened new loss value to track_list
@@ -307,7 +308,6 @@ class ANFIS:
                     if save_path is not None:
                         saver.save(sess, save_path)
                 # writer(f"{e}: {c}")
-                writer(e)
 
             # Check save_path
             if save_path is not None:
