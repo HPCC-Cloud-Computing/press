@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 import numpy as np
 import pandas as pd
-import anf as anfis
+from archive import anf as anfis
 import matplotlib.pyplot as plt
 from utils import loss_function
 from datetime import datetime
@@ -13,7 +13,7 @@ ATTRIBUTE = 'meanCPUUsage'
 EPOCH = 30
 # Khai bao file
 # Ten file
-fname = "google_trace_timeseries/data_resource_usage_10Minutes_6176858948.csv"
+fname = "dataset/data_resource_usage_10Minutes_6176858948.csv"
 # Cac Header trong file
 header = ["time_stamp", "numberOfTaskIndex", "numberOfMachineId",
           "meanCPUUsage", "canonical memory usage", "AssignMem",

@@ -1,8 +1,10 @@
-import tensorflow as tf
+from datetime import datetime
+
 import numpy as np
-from sklearn.metrics import mean_absolute_error
+import tensorflow as tf
 
 
+# Initialize variables as Premise Parameter
 def premise_parameter(para_shape, min_mu=10.0, max_mu=15.0, min_sigma=5.0, max_sigma=10.0):
     """
 
@@ -26,7 +28,16 @@ def consequence_parameter(para_shape):
     return tf.Variable(para_init)
 
 
+# Create a number of neighbors of value x
+# for Simulated Annealing
+def neighbor(x):
+    delta = tf.random_normal(shape=x.get_shape(), mean=0.0, stddev=0.001 * tf.reduce_mean(x))
+    x = x + delta
+    return x
+
+
 class ANFIS:
+
     def __init__(self, rule_number, window_size):
         """
         :param rule_number:
@@ -41,104 +52,163 @@ class ANFIS:
         self.weights = consequence_parameter(self.consequence_shape_weights)
         self.bias = consequence_parameter(self.consequence_shape_bias)
 
-    def predict(self, x, input_size):
+    def output(self, x: np.ndarray):
         """
-
-        :param input_size:
+        Show list of outputs from list of inputs
         :param x:
-        :return:
+        :return output:
         """
+        # Reshape
         with tf.name_scope("reshape"):
             x_input = tf.tile(x, [1, self.rule_number, 1])
 
-        with tf.name_scope('layer_1'):  # Fuzzification Layer
-            # Premise parameters tmp = - tf.divide(tf.square(tf.subtract(x_input, self.w_fuzz['mu']) / 2.0),
-            # tf.square(self.w_fuzz['sigma']))
+        # Fuzzification Layer
+        with tf.name_scope('layer_1'):
             fuzzy_sets = tf.exp(- tf.divide(tf.square(tf.subtract(x_input, self.w_fuzz['mu']) / 2.0),
                                             tf.square(self.w_fuzz['sigma'])))
-        with tf.name_scope('layer_2'):  # Rule-set Layer
+        # Rule-set Layer
+        with tf.name_scope('layer_2'):
             fuzzy_rules = tf.reduce_prod(fuzzy_sets, axis=2)
 
-        with tf.name_scope('layer_3'):  # Normalization Layer
-            sum_fuzzy_rules = tf.expand_dims(tf.reduce_sum(fuzzy_rules, axis=1), axis=1)
-            normalized_fuzzy_rules = tf.expand_dims(tf.divide(fuzzy_rules[0], sum_fuzzy_rules[0]), axis=0)
-            for i in np.arange(1, input_size):
-                tmp_norm_rules = tf.expand_dims(tf.divide(fuzzy_rules[i], sum_fuzzy_rules[i]), axis=0)
-                normalized_fuzzy_rules = tf.concat([normalized_fuzzy_rules, tmp_norm_rules], 0)
-            normalized_fuzzy_rules = tf.expand_dims(normalized_fuzzy_rules, axis=1)
+        # Normalization Layer
+        with tf.name_scope('layer_3'):
+            sum_fuzzy_rules = tf.reduce_sum(fuzzy_rules, axis=1)
+            normalized_fuzzy_rules = tf.divide(fuzzy_rules, tf.reshape(sum_fuzzy_rules, (-1, 1)))
 
-        with tf.name_scope('layer_4_5'):  # Defuzzification Layer and Output Layer
-            f = tf.squeeze(tf.expand_dims(tf.transpose(tf.add(tf.matmul(x[0], self.weights), self.bias)), axis=0), [0])
-            output = tf.matmul(normalized_fuzzy_rules[0], f)
-            for i in np.arange(1, input_size):
-                tmp_f = tf.squeeze(tf.expand_dims(
-                    tf.transpose(tf.add(tf.matmul(x[i], self.weights), self.bias)), axis=0), [0])
-                tmp_output = tf.matmul(normalized_fuzzy_rules[i], tmp_f)
-                output = tf.concat([output, tmp_output], 0)
-        return output
+        # Defuzzification Layer and Output Layer
+        with tf.name_scope('layer_4_5'):
+            f = tf.add(tf.matmul(tf.reshape(x, (-1, self.window_size)), self.weights), self.bias)
+            output = tf.reduce_sum(tf.multiply(normalized_fuzzy_rules, f), axis=1)
 
-    def train(self, x_train, y_train, x_test, y_test, batch_size, epoch, rate):
+        return tf.reshape(output, (-1, 1))
+
+    def train(self, x_train, y_train,
+              epoch, rate,
+              x_test=None, y_test=None,
+              save_path=None,
+              tracking=None):
         """
-
-        :rtype: object
+        Kieu train anfis thuan tuy, su dung duy nhat GD
+        Training theo kich ban 1
+        :param x_train:
+        :param y_train:
+        :param epoch:
+        :param rate:
+        :param x_test:
+        :param y_test:
+        :param save_path:
+        :return:
         """
-        # Session
-        net = tf.InteractiveSession()
         # Placeholder
+        print(f'{datetime.now()}: \t Creating Placeholders ... ')
         x = tf.placeholder(dtype=tf.float32, shape=[None, 1, self.window_size])
         y = tf.placeholder(dtype=tf.float32, shape=[None, 1])
 
         # Cost function
-        cost = tf.reduce_mean(tf.squared_difference(self.predict(x, batch_size), y))
-
-        # Entire train loss function
-        # Phan code nay dung de lay cac gia tri cua train loss, su dung de ve~ do thi hoi tu loss
-        # lost = tf.reduce_mean(tf.squared_difference(self.predict(x, x_train.shape[0]), y))
-        # lost_list = []
+        print(f'{datetime.now()}: \t Creating Cost function ... ')
+        cost = tf.reduce_mean(tf.squared_difference(self.output(x), y))
 
         # Optimizer
+        print(f'{datetime.now()}: \t Creating Optimizer ... ')
         optimizer = tf.train.AdamOptimizer(rate).minimize(cost)
 
-        # Test loss
-        # acc la bien dua ra gia tri ve RMSE cua tap test so voi gia tri du doan duoc
-        acc = tf.sqrt(tf.reduce_mean(tf.squared_difference(self.predict(x, x_test.shape[0]), y)))
-        # Su dung pred nay de dua ra duoc MAE vi MAE khong co san trong tensorflow
-        # Viec nay khong anh huong nhieu den code performance nen khong can dua het vao tensor cung duoc
-        pred = self.predict(x, x_test.shape[0])
+        # Loader and Saver()
+        saver = tf.train.Saver(max_to_keep=None)
 
-        # Init session
-        net.run(tf.global_variables_initializer())
-
+        min_points = 9999
         # Start training
-        for e in range(epoch):
-            # Shuffle training data
-            shuffle = np.random.permutation(np.arange(len(y_train)))
-            x_train = x_train[shuffle]
-            y_train = y_train[shuffle]
 
-            # Based-batch training
-            for i in np.arange(0, len(y_train) // batch_size):
-                start = i * batch_size
-                batch_x = x_train[start:start + batch_size]
-                batch_y = y_train[start:start + batch_size]
+        with tf.Session() as sess:
+            sess.run(tf.global_variables_initializer())
+            # Load model from path
+            for e in range(epoch):
+                sess.run(optimizer, feed_dict={x: x_train, y: y_train})
 
-                # Optimizing
-                net.run(optimizer, feed_dict={x: batch_x, y: batch_y})
+                point = sess.run(cost, feed_dict={x: x_test, y: y_test})
+                loss_value = sess.run(cost, feed_dict={x: x_train, y: y_train})
+                if point < min_points:
+                    min_points = point
+                print(
+                    f"{datetime.now()}: Epoch: {e} - Loss function: "
+                    f"{loss_value} - point: {point} - minimum: {min_points}")
+            if save_path is not None:
+                print(f"Saving model to directory {save_path} ...")
+                saver.save(sess, save_path)
+        return
 
-            # Chay cac gia tri ve loss de in ra hoac ve do thi
-            # lost_value = net.run(lost, feed_dict={x: x_train, y: y_train})
-            test_rmse = net.run(acc, feed_dict={x: x_test, y: y_test})  # RMSE test
-            pred_value = net.run(pred, feed_dict={x: x_test})
-            test_mae = mean_absolute_error(pred_value, y_test)  # MAE test
-            print(e, 'Test-RMSE: ', test_rmse, 'MAE:', test_mae)
-            # lost_list.append(lost_value)
-            # Neu muon lay ham ve do thi, co the goi ham show_image trong file utils.py
-        net.close()
-        # duration = time.time() - start_time
-        # print(duration)
-
-    def summary(self):
+    def sa1_train(self):
+        """
+        Training theo kich ban 2
+        Trong 1 epoch, thuc hien GD truoc, sau do thuc hien SA
+        """
         pass
 
-    def save(self):
+    def sa2_train(self):
+        """
+        Training theo kich ban 3
+        :return:
+        """
+        pass
+
+    def sa3_train(self):
+        """
+        Training theo kich ban 4
+        """
+        pass
+
+    def sa4_train(self):
+        """
+        Training theo kich ban 5
+        """
+        pass
+
+    def predict(self, input_data, load_path=None):
+        # Initialize
+        with tf.name_scope("Initialize"):
+            # Initialize Placeholder
+            print("Initializing Placeholder ..")
+            # tf.reset_default_graph()
+            x = tf.placeholder(dtype=tf.float32, shape=[None, 1, self.window_size])
+
+            loader = tf.train.Saver()
+
+            predict = self.output(x)
+            with tf.Session() as sess:
+                if load_path is not None:
+                    print(f"Restoring models from path: {load_path}")
+                    loader.restore(sess, load_path)
+                # Restore model from path and computing result from input x_test
+
+                print("Computing result ...")
+                result = sess.run(predict, feed_dict={x: input_data})
+                print("Done")
+        return result
+
+    def mse(self, x, y, load_path):
+        # Initialize
+        with tf.name_scope("Initialize"):
+            # Initialize Placeholder
+            print("Initializing Placeholder ..")
+            # tf.reset_default_graph()
+            x_placeholder = tf.placeholder(dtype=tf.float32, shape=[None, 1, self.window_size])
+            y_placeholder = tf.placeholder(dtype=tf.float32, shape=[None, 1])
+
+            loader = tf.train.Saver()
+
+            mse = tf.reduce_mean(tf.squared_difference(self.output(x_placeholder), y_placeholder))
+
+            with tf.Session() as sess:
+                if load_path is not None:
+                    print(f"Restoring models from path: {load_path}")
+                    loader.restore(sess, load_path)
+                # Restore model from path and computing result from input x_test
+
+                print("Computing result ...")
+                result = sess.run(mse, feed_dict={x_placeholder: x, y_placeholder: y})
+                print(result)
+                print("Done")
+        return result
+
+    def compare_images(self, x, y, load_path):
+        # predicted = self.predict(x, load_path=load_path)
         pass

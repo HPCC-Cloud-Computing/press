@@ -1,4 +1,6 @@
-import models
+#!/usr/bin/env python
+
+import old_models
 import pandas as pd
 from utils import extract_data
 
@@ -10,11 +12,16 @@ ATTRIBUTE = 'meanCPUUsage'
 p_para_shape = [WINDOW_SIZE, RULE_NUMBER]
 TRAIN_PERCENTAGE = 0.8
 BATCH_SIZE = 10
-EPOCH = 2000
+EPOCH = 30
 LEARNING_RATE = 1e-4
 
+# Cac tham so lien quan den giai thuat SA
+NEIGHBOR_NUMBER = 10
+REDUCE_FACTOR = 0.95
+TEMPERATURE_INIT = 100
+
 # Ten file duoc dua vao ANFIS network
-fname = "google_trace_timeseries/data_resource_usage_10Minutes_6176858948.csv"
+fname = "dataset/data_resource_usage_10Minutes_6176858948.csv"
 
 # Cac Header trong file
 header = ["time_stamp", "numberOfTaskIndex", "numberOfMachineId",
@@ -32,11 +39,12 @@ def main():
     x_train, y_train, x_test, y_test = extract_data(df, window_size=WINDOW_SIZE,
                                                     attribute=ATTRIBUTE, train_percentage=TRAIN_PERCENTAGE)
     # Khai bao ANFIS network
-    anf_model = models.ANFIS(window_size=WINDOW_SIZE, rule_number=RULE_NUMBER)
+    anf_model = old_models.ANFIS(window_size=WINDOW_SIZE, rule_number=RULE_NUMBER)
 
     # Bat dau huan luyen mang anfis
-    anf_model.train(x_train=x_train, y_train=y_train, x_test=x_test, y_test=y_test,
-                    batch_size=BATCH_SIZE, epoch=EPOCH, rate=LEARNING_RATE)
+    anf_model.hybrid_sa_training(x_train=x_train, y_train=y_train, x_test=x_test, y_test=y_test,
+                                 batch_size=BATCH_SIZE, epoch=EPOCH, rate=LEARNING_RATE, neighbor_number=NEIGHBOR_NUMBER,
+                                 reduce_factor=REDUCE_FACTOR, temp_init=TEMPERATURE_INIT)
 
 
 if __name__ == '__main__':
