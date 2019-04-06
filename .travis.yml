@@ -1,22 +1,22 @@
-sudo: false
-cache:
-  directories:
-    - $HOME/.cache/pip
+# sudo: false
+# cache:
+#   directories:
+#     - $HOME/.cache/pip
 
-language: python
+# language: python
 
-matrix:
-  include:
-    - python: "3.5"
-      env: TOXENV=flake8
-    - python: "3.6"
-      env: TOXENV=flake8
+# matrix:
+#   include:
+#     - python: "3.5"
+#       env: TOXENV=flake8
+#     - python: "3.6"
+#       env: TOXENV=flake8
 
-install:
-  - pip install tox
+# install:
+#   - pip install tox
 
-script:
-  - tox
+# script:
+#   - tox
 
 # notifications:
 #   email: false
